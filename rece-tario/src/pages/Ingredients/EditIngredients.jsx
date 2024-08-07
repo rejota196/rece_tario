@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosConfig';
 import Layout from '../Layout';
 
+
 export const EditIngredients = () => {
   const { id } = useParams();
   const [name, setName] = useState('');

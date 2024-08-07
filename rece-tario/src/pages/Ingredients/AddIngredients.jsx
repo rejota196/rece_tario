@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosConfig';
 import Layout from '../Layout';
 
+
 export const AddIngredients = () => {
   const [name, setName] = useState('');
   const [error, setError] = useState(null);
