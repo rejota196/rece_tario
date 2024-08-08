@@ -1,30 +1,32 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './pages/Home';
-import Login from './pages/Login';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './contexts/AuthContext';
 import AddRecipe from './pages/AddRecipe';
-import EditRecipe from './pages/EditRecipe';
-import RecipeDetail from './pages/RecipeDetail';
-import CategoryList from './pages/Categories/CategoryList';
 import AddCategory from './pages/Categories/AddCategory';
+import CategoryList from './pages/Categories/CategoryList';
 import EditCategory from './pages/Categories/EditCategory';
-import CommentList from './pages/Comments/CommentList';
 import AddComment from './pages/Comments/AddComment';
+import CommentList from './pages/Comments/CommentList';
 import EditComment from './pages/Comments/EditComment';
+import EditRecipe from './pages/EditRecipe';
+import Home from './pages/Home';
 import AddIngredients from './pages/Ingredients/AddIngredients';
 import EditIngredients from './pages/Ingredients/EditIngredients';
 import IngredientList from './pages/Ingredients/IngredientList';
-import RecipeList from './pages/RecipeList';
+//import RecipeIngredients from './pages/Ingredients/RecipeIngredients';
 import Layout from './pages/Layout';
-import { AuthProvider } from './contexts/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import LocationList from './pages/Locations/LocationList';
+import Login from './pages/Login';
 import NotFound from './pages/NotFound';
-import RatingsList from './pages/ratings/RatingsList';
 import AddRating from './pages/ratings/AddRating';
-import EditRating from './pages/ratings/EditRating';
+import AddRecipeRating from './pages/ratings/AddRecipeRating';
 import DeleteRating from './pages/ratings/DeleteRating';
+import EditRating from './pages/ratings/EditRating';
 import RatingDetail from './pages/ratings/RatingDetail';
-import AddRecipeRating from './pages/ratings/AddRecipeRating'; 
+import RatingsList from './pages/ratings/RatingsList';
 import RecipeListForRating from './pages/ratings/RecipeListForRating';
+import RecipeDetail from './pages/RecipeDetail';
+import RecipeList from './pages/RecipeList';
 
 const App = () => {
   return (
@@ -52,8 +54,10 @@ const App = () => {
             <Route path="/ratings/edit/:id" element={<ProtectedRoute element={<EditRating />} />} />
             <Route path="/ratings/delete/:id" element={<ProtectedRoute element={<DeleteRating />} />} />
             <Route path="/ratings/:id" element={<ProtectedRoute element={<RatingDetail />} />} />
-            <Route path="/recipe/:id/add-rating" element={<ProtectedRoute element={<AddRecipeRating />} />} /> 
-            <Route path="/recipes/for-rating" element={<ProtectedRoute element={<RecipeListForRating />} />} /> 
+            <Route path="/recipe/:id/add-rating" element={<ProtectedRoute element={<AddRecipeRating />} />} />
+            <Route path="/recipes/for-rating" element={<ProtectedRoute element={<RecipeListForRating />} />} />
+            
+            <Route path="/locations" element={<ProtectedRoute element={<LocationList />} />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
@@ -62,4 +66,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default App;
