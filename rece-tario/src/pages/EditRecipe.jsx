@@ -36,23 +36,23 @@ const EditRecipe = () => {
 
   return (
     <div className="container">
-      <h2 className="title">Edit Recipe</h2>
+      <h2 className="title">Editar Receta</h2>
       {error && <div className="notification is-danger">Error: {error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="field">
-          <label className="label">Title</label>
+          <label className="label">Titulo</label>
           <div className="control">
             <input className="input" type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
           </div>
         </div>
         <div className="field">
-          <label className="label">Description</label>
+          <label className="label">Descripcion</label>
           <div className="control">
             <textarea className="textarea" value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
           </div>
         </div>
         <div className="control">
-          <button className="button is-primary" type="submit">Update Recipe</button>
+          <button className="button is-primary" type="submit">Actualizar Receta</button>
         </div>
       </form>
     </div>
