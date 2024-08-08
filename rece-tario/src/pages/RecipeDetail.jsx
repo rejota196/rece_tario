@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import defaultImage from '../assets/sin-foto.png';
+import Layout from './Layout';
 
 const RecipeDetail = () => {
   const { id } = useParams();
@@ -21,15 +23,46 @@ const RecipeDetail = () => {
       });
   }, [id]);
 
-  if (loading) return <div className="notification is-info">Loading...</div>;
+  if (loading) return <div className="notification is-info">Cargando...</div>;
   if (error) return <div className="notification is-danger">Error: {error}</div>;
-  if (!recipe) return <div className="notification is-warning">No recipe found</div>;
+  if (!recipe) return <div className="notification is-warning">No se encontrÃ³ la receta</div>;
 
   return (
-    <div className="container">
-      <h1 className="title">{recipe.title}</h1>
-      <p>{recipe.description}</p>
-    </div>
+    <Layout>
+      <div className="section">
+        <div className="container">
+          <div className="columns is-centered">
+            <div className="column is-half">
+              <div className="card">
+                <div className="card-image">
+                  <figure className="image is-4by3">
+                    <img src={recipe.image || defaultImage} alt={recipe.title} />
+                  </figure>
+                </div>
+                <div className="card-content">
+                  <div className="media">
+                    <div className="media-content">
+                      <p className="title is-4">{recipe.title}</p>
+                    </div>
+                  </div>
+                  <div className="content">
+                    <p>{recipe.description}</p>
+                    <p><strong>Ingredientes:</strong></p>
+                    <ul>
+                      {recipe.ingredients.map((ingredient, index) => (
+                        <li key={index}>{ingredient.name}: {ingredient.amount}</li>
+                      ))}
+                    </ul>
+                    <p><strong>Instrucciones:</strong></p>
+                    <p>{recipe.instructions}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Layout>
   );
 };
 
