@@ -15,7 +15,7 @@ const Navbar = () => {
     <nav className="navbar is-light">
       <div className="container">
         <div className="navbar-brand">
-          <Link className="navbar-item" to="/">Recipe Rover</Link>
+          <Link className="navbar-item" to="/">RECETAS DEL CULO</Link>
           <div className="navbar-burger" data-target="navbarMenuHeroA">
             <span></span>
             <span></span>
