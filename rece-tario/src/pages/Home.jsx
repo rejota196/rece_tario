@@ -1,77 +1,176 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useEffect, useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Modal from 'react-modal';
+import axiosInstance from '../utils/axiosConfig';
+import { AuthContext } from '../contexts/AuthContext';
+import defaultImage from '../assets/sin-foto.png'; 
 
 const Home = () => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const { state: { user } } = useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('https://sandbox.academiadevelopers.com/reciperover/recipes/')
-      .then(response => {
-        if (response.data && Array.isArray(response.data.results)) {
-          setRecipes(response.data.results);
-        } else {
-          setError('Formato de respuesta inesperado');
-        }
-        setLoading(false);
-      })
-      .catch(error => {
-        setError(error.message);
-        setLoading(false);
-      });
-  }, []);
+    fetchRecipes(currentPage);
+  }, [currentPage]);
+
+  const fetchRecipes = async (page) => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get(`/reciperover/recipes/?ordering=-created_at&page=${page}`);
+      if (response.data && Array.isArray(response.data.results)) {
+        setRecipes(response.data.results);
+        setTotalPages(Math.ceil(response.data.count / 10)); 
+      } else {
+        setError('Unexpected response format');
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddRecipe = () => {
     navigate('/add-recipe');
   };
 
   const handleDeleteRecipe = (id) => {
-    axios.delete(`https://sandbox.academiadevelopers.com/reciperover/recipes/${id}/`)
+    axiosInstance.delete(`/reciperover/recipes/${id}/`)
       .then(() => {
         setRecipes(recipes.filter(recipe => recipe.id !== id));
       })
       .catch(error => {
-        console.error('Hubo un error al eliminar la receta!', error);
+        console.error('Error deleting recipe!', error);
       });
   };
 
-  if (loading) return <div className="notification is-info">Cargando...</div>;
+  const openModal = (recipe) => {
+    setSelectedRecipe(recipe);
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalIsOpen(false);
+    setSelectedRecipe(null);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  if (loading) return <div className="notification is-info">Loading...</div>;
   if (error) return <div className="notification is-danger">Error: {error}</div>;
+
+  const myRecipes = user ? recipes.filter(recipe => recipe.owner === user.id) : [];
+  const popularRecipes = user ? recipes.filter(recipe => recipe.owner !== user.id) : recipes;
 
   return (
     <div className="section">
       <div className="container">
-        <h1 className="title has-text-centered">Bienvenido a Recipe Rover</h1>
-        <h2 className="subtitle has-text-centered">Descubre y comparte recetas increíbles</h2>
+        <div className="hero">
+          <h1 className="title has-text-centered">Bienvenido a Recetas del Culo</h1>
+          <h2 className="subtitle has-text-centered">Descubre y comparte recetas increíbles</h2>
+        </div>
         <div className="buttons is-centered">
           <button className="button is-primary" onClick={handleAddRecipe}>Agregar Receta</button>
         </div>
+
+        {myRecipes.length > 0 && (
+          <>
+            <h2 className="title is-4 has-text-centered">Mis Recetas</h2>
+            <div className="columns is-multiline">
+              {myRecipes.map(recipe => (
+                <div key={recipe.id} className="column is-one-third">
+                  <div className="card">
+                    <div className="card-image">
+                      <figure className="image is-4by3">
+                        <img src={recipe.image || defaultImage} alt={recipe.title} />
+                      </figure>
+                    </div>
+                    <div className="card-content">
+                      <p className="title is-4">{recipe.title}</p>
+                      <div className="buttons">
+                        <Link className="button is-info" to={`/recipe/${recipe.id}`}>Ver Detalles</Link>
+                        <Link className="button is-warning" to={`/edit-recipe/${recipe.id}`}>Editar</Link>
+                        <button className="button is-danger" onClick={() => handleDeleteRecipe(recipe.id)}>Eliminar</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
         <h2 className="title is-4 has-text-centered">Recetas Populares</h2>
         <div className="columns is-multiline">
-          {recipes.map(recipe => (
+          {popularRecipes.map(recipe => (
             <div key={recipe.id} className="column is-one-third">
               <div className="card">
                 <div className="card-image">
                   <figure className="image is-4by3">
-                    <img src={recipe.image} alt={recipe.title} />
+                    <img src={recipe.image || defaultImage} alt={recipe.title} />
                   </figure>
                 </div>
                 <div className="card-content">
                   <p className="title is-4">{recipe.title}</p>
                   <div className="buttons">
                     <Link className="button is-info" to={`/recipe/${recipe.id}`}>Ver Detalles</Link>
-                    <button className="button is-warning" onClick={() => navigate(`/edit-recipe/${recipe.id}`)}>Editar</button>
-                    <button className="button is-danger" onClick={() => handleDeleteRecipe(recipe.id)}>Eliminar</button>
+                    <button className="button is-primary" onClick={() => openModal(recipe)}>Más Opciones</button>
                   </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
+
+        <div className="pagination is-centered">
+          <ul className="pagination-list">
+            {[...Array(totalPages).keys()].map(page => (
+              <li key={page}>
+                <button
+                  className={`pagination-link ${page + 1 === currentPage ? 'is-current' : ''}`}
+                  onClick={() => handlePageChange(page + 1)}
+                >
+                  {page + 1}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
+
+      {selectedRecipe && (
+        <Modal
+          isOpen={modalIsOpen}
+          onRequestClose={closeModal}
+          contentLabel="Opciones de Receta"
+          className="Modal"
+          overlayClassName="Overlay"
+        >
+          <h2 className="title has-text-centered">Opciones para {selectedRecipe.title}</h2>
+          <div className="buttons is-centered">
+            <Link className="button is-info" to={`/recipe/${selectedRecipe.id}`}>Ver Detalles</Link>
+            <Link className="button is-primary" to={`/recipe/${selectedRecipe.id}/ingredients`}>Ver Ingredientes</Link>
+            <Link className="button is-success" to={`/recipe/${selectedRecipe.id}/add-rating`}>Valorar</Link>
+            <Link className="button is-link" to={`/recipe/${selectedRecipe.id}/comments`}>Ver Comentarios</Link>
+          </div>
+          <button className="button is-light" onClick={closeModal}>Cerrar</button>
+        </Modal>
+      )}
+
+      <footer className="footer">
+        <div className="content has-text-centered">
+          <p>&copy; 2024 Recetas del Culo. Todos los derechos reservados.</p>
+        </div>
+      </footer>
     </div>
   );
 };
