@@ -1,50 +1,47 @@
 import { useEffect, useState } from 'react';
-import axiosInstance from '../../utils/axiosConfig';
-import Layout from '../Layout';
+import axios from 'axios';
 
-const CommentList = () => {
+const CommentsRecipeId = ({ recipeId }) => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axiosInstance.get('/reciperover/comments/')
+    axios.get(`/reciperover/comments/?recipe=${recipeId}`)
       .then(response => {
         setComments(response.data.results || []);
         setLoading(false);
       })
       .catch(error => {
+        console.error('Error al cargar los comentarios:', error);
         setError(error.message);
         setLoading(false);
       });
-  }, []);
+  }, [recipeId]);
 
-  if (loading) return <div>Cargando...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div>Cargando comentarios...</div>;
+  if (error) return <div>Error al cargar comentarios: {error}</div>;
 
   return (
-    <Layout>
     <div className="section">
-      <h1 className="title">Comentarios</h1>
       <table className="table is-fullwidth is-striped">
         <thead>
           <tr>
             <th>Comentario</th>
-            <th>Receta</th>
+            <th>Fecha</th>
           </tr>
         </thead>
         <tbody>
           {comments.map(comment => (
             <tr key={comment.id}>
               <td>{comment.content || comment.comment}</td>
-              <td>{comment.recipe?.title || 'Sin receta'}</td>
+              <td>{new Date(comment.created_at).toLocaleDateString()}</td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
-    </Layout>
   );
 };
 
-export default CommentList;
+export default CommentsRecipeId;

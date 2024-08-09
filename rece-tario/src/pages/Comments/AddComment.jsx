@@ -1,48 +1,69 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import axiosInstance from '../../utils/axiosConfig';
-import Layout from '../Layout';
 
-const AddComment = () => {
-  const [content, setContent] = useState('');
+
+const AddComment = ({ recipeId, onCommentAdded }) => {
+  const [commentText, setCommentText] = useState('');
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+
+  console.log('Recipe ID in AddComment:', recipeId); 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const commentData = {
+      content: commentText, 
+      recipe: recipeId, 
+    };
+
+    console.log('Datos del comentario:', commentData);
+
     try {
-      await axiosInstance.post('/reciperover/comments/', { content });
-      navigate('/comments');
+      const response = await axiosInstance.post('/reciperover/comments/', commentData);
+      if (response.status === 201) {
+        onCommentAdded(response.data);
+        setCommentText(''); 
+      } else {
+        setError('No se pudo agregar el comentario. Inténtalo de nuevo.');
+      }
     } catch (error) {
-      setError(error.message);
+      console.error('Error al agregar el comentario:', error.response?.data || error.message);
+      setError('Ocurrió un error. Inténtalo de nuevo.');
     }
   };
 
   return (
-    <Layout>
       <div className="section">
-        <h1 className="title">Agregar Comentario</h1>
-        {error && <div className="notification is-danger">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="field">
-            <label className="label">Comentario</label>
-            <div className="control">
-              <textarea
-                className="textarea"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                required
-              ></textarea>
+        <div className="container">
+          <h2 className="title has-text-centered">Agregar Comentario</h2>
+          {error && <div className="notification is-danger">{error}</div>}
+          <form onSubmit={handleSubmit} className="box">
+            <div className="field">
+              <label className="label">Comentario</label>
+              <div className="control">
+                <textarea
+                  className="textarea"
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  required
+                />
+              </div>
             </div>
-          </div>
-          <div className="control">
-            <button className="button is-primary" type="submit">Agregar</button>
-          </div>
-        </form>
+            <div className="control">
+              <button className="button is-primary" type="submit">
+                Añadir Comentario
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </Layout>
   );
 };
 
-export default AddComment;
+AddComment.propTypes = {
+  recipeId: PropTypes.number.isRequired,
+  onCommentAdded: PropTypes.func.isRequired,
+};
 
+export default AddComment;
