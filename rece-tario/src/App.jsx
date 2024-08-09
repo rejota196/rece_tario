@@ -13,10 +13,13 @@ import Home from './pages/Home';
 import AddIngredients from './pages/Ingredients/AddIngredients';
 import EditIngredients from './pages/Ingredients/EditIngredients';
 import IngredientList from './pages/Ingredients/IngredientList';
-//import RecipeIngredients from './pages/Ingredients/RecipeIngredients';
-import Layout from './pages/Layout';
 import LocationList from './pages/Locations/LocationList';
 import Login from './pages/Login';
+import AddNestedLocation from './pages/Nested_recipe_locations/AddNestedLocation';
+import CommentNestedLocation from './pages/Nested_recipe_locations/CommentNestedLocation';
+import DeleteNestedLocation from './pages/Nested_recipe_locations/DeleteNestedLocation';
+import EditNestedLocation from './pages/Nested_recipe_locations/EditNestedLocation';
+import ListNestedLocations from './pages/Nested_recipe_locations/ListNestedLocations';
 import NotFound from './pages/NotFound';
 import AddRating from './pages/ratings/AddRating';
 import AddRecipeRating from './pages/ratings/AddRecipeRating';
@@ -32,7 +35,6 @@ const App = () => {
   return (
     <Router>
       <AuthProvider>
-        
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<ProtectedRoute element={<Home />} />} />
@@ -58,12 +60,17 @@ const App = () => {
           <Route path="/recipes/for-rating" element={<ProtectedRoute element={<RecipeListForRating />} />} />
           
           <Route path="/locations" element={<ProtectedRoute element={<LocationList />} />} />
+          <Route path="/locations/add/:recipe_pk" element={<ProtectedRoute element={<AddNestedLocation />} />} />
+          <Route path="/locations/edit/:recipe_pk/:id" element={<ProtectedRoute element={<EditNestedLocation />} />} />
+          <Route path="/locations/comment/:recipe_pk" element={<ProtectedRoute element={<CommentNestedLocation />} />} />
+          <Route path="/locations/delete/:id/:nestedId" element={<ProtectedRoute element={<DeleteNestedLocation />} />} />
+          <Route path="/locations/list/:recipe_pk" element={<ProtectedRoute element={<ListNestedLocations />} />} />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
-        
       </AuthProvider>
     </Router>
   );
 };
 
-export default App;
+export default App;
