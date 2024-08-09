@@ -3,6 +3,7 @@ import axiosInstance from '../../utils/axiosConfig';
 import Modal from 'react-modal';
 import Layout from '../Layout';
 import { AuthContext } from '../../contexts/AuthContext';
+import defaultImage from '../../assets/sin-foto.png';
 
 const RatingsList = () => {
   const [recipes, setRecipes] = useState([]);
@@ -98,7 +99,7 @@ const RatingsList = () => {
               <div className="card">
                 <div className="card-image">
                   <figure className="image is-4by3">
-                    <img src={recipe.image} alt={recipe.title} />
+                    <img src={recipe.image || defaultImage} alt={recipe.title} />
                   </figure>
                 </div>
                 <div className="card-content">
