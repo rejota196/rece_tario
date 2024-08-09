@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosConfig';
 import Layout from '../Layout';
 
-
 export const CommentIngredients = () => {
   const [ingredients, setIngredients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,13 +19,13 @@ export const CommentIngredients = () => {
       });
   }, []);
 
-  if (loading) return <div>Cargando...</div>;
+  if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
     <Layout>
       <div className="section">
-        <h1 className="title">Ingredientes</h1>
+        <h1 className="title">Ingredients</h1>
         <ul>
           {ingredients.map(ingredient => (
             <li key={ingredient.id}>{ingredient.name}</li>
