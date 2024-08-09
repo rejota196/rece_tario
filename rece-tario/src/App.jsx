@@ -26,6 +26,7 @@ import AddRecipeRating from './pages/ratings/AddRecipeRating';
 import RecipeListForRating from './pages/ratings/RecipeListForRating';
 import RecipeIngredients from './pages/Ingredients/RecipeIngredients';
 import LocationList from './pages/Locations/LocationList'; 
+import NestedIngredientsList from './pages/Nested/Ingredients/NestedIngredientsList'
 
 const App = () => {
   return (
@@ -56,6 +57,7 @@ const App = () => {
             <Route path="/recipes/for-rating" element={<ProtectedRoute element={<RecipeListForRating />} />} />
             <Route path="/recipe/:id/ingredients" element={<ProtectedRoute element={<RecipeIngredients />} />} />
             <Route path="/locations" element={<ProtectedRoute element={<LocationList />} />} />
+            <Route path="/nested-ingredients-list" element={<ProtectedRoute element={<NestedIngredientsList />} />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
       </AuthProvider>
