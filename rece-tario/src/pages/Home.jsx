@@ -4,6 +4,7 @@ import Modal from 'react-modal';
 import axiosInstance from '../utils/axiosConfig';
 import { AuthContext } from '../contexts/AuthContext';
 import defaultImage from '../assets/sin-foto.png'; 
+import Layout from './Layout';
 
 const Home = () => {
   const [recipes, setRecipes] = useState([]);
@@ -72,7 +73,8 @@ const Home = () => {
   const popularRecipes = user ? recipes.filter(recipe => recipe.owner !== user.id) : recipes;
 
   return (
-    <div className="section">
+    <Layout>
+      <div className="section">
       <div className="container">
         <div className="hero">
           <h1 className="title has-text-centered">Bienvenido a Recetas del Culo</h1>
@@ -172,6 +174,7 @@ const Home = () => {
         </div>
       </footer>
     </div>
+    </Layout>
   );
 };
 
