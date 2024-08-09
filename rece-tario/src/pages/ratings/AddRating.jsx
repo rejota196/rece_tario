@@ -4,7 +4,7 @@ import axiosInstance from '../../utils/axiosConfig';
 import Layout from '../Layout';
 
 const AddRating = () => {
-  const [rating, setRating] = useState('');
+  const [rating, setRating] = useState(null);
   const [comment, setComment] = useState('');
   const [recipe, setRecipe] = useState('');
   const [recipes, setRecipes] = useState([]);
@@ -14,14 +14,15 @@ const AddRating = () => {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const response = await axiosInstance.get('/reciperover/recipes/');
+        const response = await axiosInstance.get('/reciperover/recipes/?page_size=100'); // Ajustamos el page_size para traer más recetas
         if (response.data && Array.isArray(response.data.results)) {
           setRecipes(response.data.results);
         } else {
-          setError('Unexpected response format');
+          setError('Formato de respuesta inesperado');
         }
       } catch (error) {
-        console.error('Failed to fetch recipes:', error);
+        console.error('Error al obtener las recetas:', error);
+        setError('Error al obtener las recetas');
       }
     };
 
@@ -32,7 +33,7 @@ const AddRating = () => {
     e.preventDefault();
 
     const ratingData = {
-      rating: parseInt(rating, 10),
+      rating,
       comment,
       recipe: parseInt(recipe, 10)
     };
@@ -42,16 +43,20 @@ const AddRating = () => {
 
       if (response.status !== 201) {
         const errorData = response.data;
-        console.error('Error data:', errorData);
-        throw new Error(`Failed to add rating: ${response.statusText}`);
+        console.error('Datos del error:', errorData);
+        throw new Error(`Fallo al agregar la valoración: ${response.statusText}`);
       }
 
-      alert('Rating added successfully');
+      alert('Valoración añadida con éxito');
       navigate('/ratings');
     } catch (error) {
-      console.error('Failed to add rating:', error);
+      console.error('Error al agregar la valoración:', error);
       setError(error.message);
     }
+  };
+
+  const handleRatingClick = (value) => {
+    setRating(value);
   };
 
   return (
@@ -61,22 +66,44 @@ const AddRating = () => {
         {error && <div className="notification is-danger">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="field">
-            <label className="label" htmlFor="rating">Valoración</label>
+            <label className="label">Valoración</label>
             <div className="control">
-              <input className="input" id="rating" type="number" value={rating} onChange={(e) => setRating(e.target.value)} required />
+              <div className="rating-buttons">
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={`button ${rating === value ? 'is-primary' : 'is-light'}`}
+                    onClick={() => handleRatingClick(value)}
+                  >
+                    {value} ★
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           <div className="field">
             <label className="label" htmlFor="comment">Comentario</label>
             <div className="control">
-              <textarea className="textarea" id="comment" value={comment} onChange={(e) => setComment(e.target.value)}></textarea>
+              <textarea 
+                className="textarea" 
+                id="comment" 
+                value={comment} 
+                onChange={(e) => setComment(e.target.value)}
+                required
+              ></textarea>
             </div>
           </div>
           <div className="field">
             <label className="label" htmlFor="recipe">Receta</label>
             <div className="control">
               <div className="select">
-                <select id="recipe" value={recipe} onChange={(e) => setRecipe(e.target.value)} required>
+                <select 
+                  id="recipe" 
+                  value={recipe} 
+                  onChange={(e) => setRecipe(e.target.value)} 
+                  required
+                >
                   <option value="">Seleccione una receta</option>
                   {recipes.map((recipe) => (
                     <option key={recipe.id} value={recipe.id}>{recipe.title}</option>
