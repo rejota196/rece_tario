@@ -10,23 +10,29 @@ const RatingsList = () => {
   const [error, setError] = useState(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedRating, setSelectedRating] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1); 
+  const [totalPages, setTotalPages] = useState(1);
   const { state: { user } } = useContext(AuthContext);
 
   useEffect(() => {
-    axiosInstance.get('/reciperover/recipes/?expand=ratings')
-      .then(response => {
+    const fetchRecipes = async (page) => {
+      try {
+        const response = await axiosInstance.get(`/reciperover/recipes/?expand=ratings&page=${page}&page_size=10`);
         if (response.data && Array.isArray(response.data.results)) {
           setRecipes(response.data.results);
+          setTotalPages(Math.ceil(response.data.count / 10));
         } else {
-          setError('Unexpected response format');
+          setError('Formato de respuesta inesperado');
         }
         setLoading(false);
-      })
-      .catch(error => {
+      } catch (error) {
         setError(error.message);
         setLoading(false);
-      });
-  }, []);
+      }
+    };
+
+    fetchRecipes(currentPage);
+  }, [currentPage]);
 
   const openModal = (rating) => {
     setSelectedRating(rating);
@@ -48,6 +54,35 @@ const RatingsList = () => {
     } catch (error) {
       console.error('Failed to delete rating:', error);
     }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prevPage => prevPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prevPage => prevPage - 1);
+    }
+  };
+
+  const renderRatingButtons = (rating) => {
+    return (
+      <div className="rating-buttons">
+        {[1, 2, 3, 4, 5].map((value) => (
+          <button
+            key={value}
+            type="button"
+            className={`button ${rating === value ? 'is-primary' : 'is-light'}`}
+            disabled
+          >
+            {value} ★
+          </button>
+        ))}
+      </div>
+    );
   };
 
   if (loading) return <div className="notification is-info">Cargando...</div>;
@@ -75,7 +110,7 @@ const RatingsList = () => {
                       recipe.ratings.map(rating => (
                         <div key={rating.id} className="box">
                           <p className="title is-6">{rating.comment}</p>
-                          <p className="subtitle is-6">Rating: {rating.rating}</p>
+                          <div className="subtitle is-6">{renderRatingButtons(rating.rating)}</div>
                           <div className="buttons">
                             <button className="button is-info" onClick={() => openModal(rating)}>Ver Detalles</button>
                             {user && rating.author === user.id && (
@@ -85,7 +120,7 @@ const RatingsList = () => {
                         </div>
                       ))
                     ) : (
-                      <p>No hay valoraciones disponibles</p>
+                      <p>No hay valoraciones disponibles para esta receta</p>
                     )}
                   </div>
                 </div>
@@ -93,6 +128,23 @@ const RatingsList = () => {
             </div>
           ))}
         </div>
+
+        <nav className="pagination is-centered" role="navigation" aria-label="pagination">
+          <button
+            className="pagination-previous"
+            onClick={handlePrevPage}
+            disabled={currentPage === 1}
+          >
+            Anterior
+          </button>
+          <button
+            className="pagination-next"
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+          >
+            Siguiente
+          </button>
+        </nav>
       </div>
 
       {selectedRating && (
@@ -106,7 +158,7 @@ const RatingsList = () => {
           <div className="box">
             <h2 className="title has-text-centered">Detalle de Valoración</h2>
             <p><strong>Comentario:</strong> {selectedRating.comment}</p>
-            <p><strong>Valoración:</strong> {selectedRating.rating}</p>
+            <div><strong>Valoración:</strong> {renderRatingButtons(selectedRating.rating)}</div>
             <p><strong>Autor:</strong> {selectedRating.author}</p>
             <button className="button is-light" onClick={closeModal}>Cerrar</button>
           </div>
