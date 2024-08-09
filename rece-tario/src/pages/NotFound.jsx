@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import notFoundImage from '../assets/404.png'; 
+import Layout from './Layout';
 
 const NotFound = () => {
   return (
+    <Layout>
     <div className="section">
       <div className="container has-text-centered">
         <h1 className="title">No Mi rey por Aqui no es...</h1>
@@ -15,6 +17,7 @@ const NotFound = () => {
         </div>
       </div>
     </div>
+    </Layout>
   );
 };
 
