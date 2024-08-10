@@ -1,9 +1,9 @@
-import { useEffect, useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
 import Modal from 'react-modal';
-import axiosInstance from '../utils/axiosConfig';
+import { Link, useNavigate } from 'react-router-dom';
+import defaultImage from '../assets/sin-foto.png';
 import { AuthContext } from '../contexts/AuthContext';
-import defaultImage from '../assets/sin-foto.png'; 
+import axiosInstance from '../utils/axiosConfig';
 import Layout from './Layout';
 
 const Home = () => {
@@ -77,7 +77,7 @@ const Home = () => {
       <div className="section">
       <div className="container">
         <div className="hero">
-          <h1 className="title has-text-centered">Bienvenido a Recetas del Culo</h1>
+          <h1 className="title has-text-centered">Bienvenido a SI! Chef</h1>
           <h2 className="subtitle has-text-centered">Descubre y comparte recetas increíbles</h2>
         </div>
         <div className="buttons is-centered">
