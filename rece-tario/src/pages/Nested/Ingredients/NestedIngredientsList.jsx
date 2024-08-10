@@ -8,7 +8,7 @@ const NestedIngredientsList = () => {
   const [recipesMap, setRecipesMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedRecipe, setSelectedRecipe] = useState({}); // Estado para manejar la receta seleccionada
+  const [selectedRecipe, setSelectedRecipe] = useState({}); 
   const navigate = useNavigate();
 
   useEffect(() => {
