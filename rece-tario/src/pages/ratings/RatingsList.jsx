@@ -13,7 +13,7 @@ const RatingsList = () => {
   const [selectedRating, setSelectedRating] = useState(null);
   const [currentPage, setCurrentPage] = useState(1); 
   const [totalPages, setTotalPages] = useState(1);
-  const { state: { user } } = useContext(AuthContext);
+  const { state: { user, isAuthenticated } } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchRecipes = async (page) => {
@@ -114,7 +114,7 @@ const RatingsList = () => {
                           <div className="subtitle is-6">{renderRatingButtons(rating.rating)}</div>
                           <div className="buttons">
                             <button className="button is-info" onClick={() => openModal(rating)}>Ver Detalles</button>
-                            {user && rating.author === user.id && (
+                            {isAuthenticated && user && rating.author === user.id && (  // Verificar si es el autor antes de mostrar el botón de eliminar
                               <button className="button is-danger" onClick={() => handleDeleteRating(rating.id)}>Eliminar</button>
                             )}
                           </div>
@@ -160,7 +160,7 @@ const RatingsList = () => {
             <h2 className="title has-text-centered">Detalle de Valoración</h2>
             <p><strong>Comentario:</strong> {selectedRating.comment}</p>
             <div><strong>Valoración:</strong> {renderRatingButtons(selectedRating.rating)}</div>
-            <p><strong>Autor:</strong> {selectedRating.author}</p>
+            <p><strong>Autor (ID):</strong> {selectedRating.author}</p>
             <button className="button is-light" onClick={closeModal}>Cerrar</button>
           </div>
         </Modal>
