@@ -1,9 +1,9 @@
-import { useEffect, useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
 import Modal from 'react-modal';
-import axiosInstance from '../utils/axiosConfig';
+import { Link, useNavigate } from 'react-router-dom';
+import defaultImage from '../assets/sin-foto.png';
 import { AuthContext } from '../contexts/AuthContext';
-import defaultImage from '../assets/sin-foto.png'; 
+import axiosInstance from '../utils/axiosConfig';
 import Layout from './Layout';
 import MyRecipes from './MyRecipes';
 
@@ -65,15 +65,15 @@ const Home = () => {
   return (
     <Layout>
       <div className="section">
-        <div className="container">
-          <div className="hero">
-            <h1 className="title has-text-centered">Bienvenido a Recetas del Culo</h1>
-            <h2 className="subtitle has-text-centered">Descubre y comparte recetas increíbles</h2>
-          </div>
-          <div className="buttons is-centered">
-            <button className="button is-primary" onClick={handleAddRecipe}>Agregar Receta</button>
-          </div>
 
+      <div className="container">
+        <div className="hero">
+          <h1 className="title has-text-centered">Bienvenido a SI! Chef</h1>
+          <h2 className="subtitle has-text-centered">Descubre y comparte recetas increíbles</h2>
+        </div>
+        <div className="buttons is-centered">
+          <button className="button is-primary" onClick={handleAddRecipe}>Agregar Receta</button>
+        </div>
           <MyRecipes /> {/* Aquí se integra el componente Mis Recetas */}
 
           <h2 className="title is-4 has-text-centered">Recetas Populares</h2>
@@ -135,7 +135,7 @@ const Home = () => {
 
         <footer className="footer">
           <div className="content has-text-centered">
-            <p>&copy; 2024 Recetas del Culo. Todos los derechos reservados.</p>
+            <p>&copy; 2024 Si! chef. Todos los derechos reservados.</p>
           </div>
         </footer>
       </div>

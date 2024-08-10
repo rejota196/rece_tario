@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png'; // Importar logo
 import { useAuth } from '../contexts/AuthContext';
 import './Navbar.css';
 
@@ -20,7 +21,9 @@ const Navbar = () => {
     <nav className="navbar is-light">
       <div className="container">
         <div className="navbar-brand">
-          <Link className="navbar-item" to="/">RECETAS DEL CULO</Link>
+          <Link className="navbar-item" to="/">
+            <img src={logo} alt="Inicio" style={{ maxHeight: '60px' }} />
+          </Link>
           <div className="navbar-burger" onClick={toggleNavbar} data-target="navbarMenuHeroA">
             <span></span>
           </div>
