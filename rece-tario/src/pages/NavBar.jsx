@@ -2,10 +2,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png'; // Importar logo
 import { useAuth } from '../contexts/AuthContext';
 import './Navbar.css';
+import { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
 
 const Navbar = () => {
   const { state: { isAuthenticated }, actions: { logout } } = useAuth();
   const navigate = useNavigate();
+
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -16,6 +21,22 @@ const Navbar = () => {
     const navbarMenu = document.getElementById('navbarMenuHeroA');
     navbarMenu.classList.toggle('is-active');
   };
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    if (!isDarkMode) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  };
+
+  useEffect(() => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    if (currentTheme === 'dark') {
+      setIsDarkMode(true);
+    }
+  }, []);
 
   return (
     <nav className="navbar is-light">
@@ -70,11 +91,22 @@ const Navbar = () => {
             )}
           </div>
           <div className="navbar-end">
-            {isAuthenticated ? (
-              <div className="navbar-item">
-                <button className="button is-light" onClick={handleLogout}>Cerrar Sesión</button>
-              </div>
-            ) : (
+            {isAuthenticated && (
+              <>
+                <div className="navbar-item">
+                  <button className="button is-light" onClick={toggleDarkMode}>
+                    <FontAwesomeIcon 
+                      icon={isDarkMode ? faSun : faMoon} 
+                      style={{ color: isDarkMode ? '#FFD700' : '#4B0082', fontSize: '1.5rem' }} 
+                    />
+                  </button>
+                </div>
+                <div className="navbar-item">
+                  <button className="button is-light" onClick={handleLogout}>Cerrar Sesión</button>
+                </div>
+              </>
+            )}
+            {!isAuthenticated && (
               <div className="navbar-item">
                 <Link className="button is-light" to="/login">Iniciar Sesión</Link>
               </div>
@@ -87,3 +119,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
