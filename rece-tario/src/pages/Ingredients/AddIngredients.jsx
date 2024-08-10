@@ -1,21 +1,48 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosConfig';
 import Layout from '../Layout';
 
 const AddIngredients = () => {
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [measures, setMeasures] = useState([]);
+  const [selectedMeasure, setSelectedMeasure] = useState('');
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  // Cargar las opciones de medidas disponibles
+  useEffect(() => {
+    const fetchMeasures = async () => {
+      try {
+        const response = await axiosInstance.get('/reciperover/measures/');
+        if (response.data && Array.isArray(response.data)) {
+          setMeasures(response.data);
+        } else {
+          setError('Error al cargar las medidas.');
+        }
+      } catch (error) {
+        setError(`Error al cargar medidas: ${error.message}`);
+      }
+    };
+
+    fetchMeasures();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axiosInstance.post('/reciperover/ingredients/', { name, description });
-      navigate('/ingredients');
+      const response = await axiosInstance.post('/reciperover/ingredients/', {
+        name,
+        measure: selectedMeasure || null,  // Incluye la medida seleccionada, si aplica
+      });
+      
+      if (response.status === 201) {
+        navigate('/ingredients');
+      } else {
+        throw new Error('Error al agregar el ingrediente.');
+      }
     } catch (error) {
-      setError(error.message);
+      setError(`Error al agregar el ingrediente: ${error.message}`);
     }
   };
 
@@ -39,14 +66,22 @@ const AddIngredients = () => {
             </div>
           </div>
           <div className="field">
-            <label className="label" htmlFor="description">Descripción</label>
+            <label className="label" htmlFor="measure">Medida</label>
             <div className="control">
-              <textarea
-                className="textarea"
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              ></textarea>
+              <div className="select">
+                <select
+                  id="measure"
+                  value={selectedMeasure}
+                  onChange={(e) => setSelectedMeasure(e.target.value)}
+                >
+                  <option value="">Seleccione una medida</option>
+                  {measures.map(measure => (
+                    <option key={measure.key} value={measure.key}>
+                      {measure.value}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
           <div className="control">

@@ -27,6 +27,8 @@ import RecipeListForRating from './pages/ratings/RecipeListForRating';
 import RecipeIngredients from './pages/Ingredients/RecipeIngredients';
 import LocationList from './pages/Locations/LocationList'; 
 import NestedIngredientsList from './pages/Nested/Ingredients/NestedIngredientsList'
+import Step from './pages/Steps/AddSteps'
+import AddStep from './pages/Steps/AddSteps';
 
 const App = () => {
   return (
@@ -52,12 +54,14 @@ const App = () => {
             <Route path="/add-rating" element={<ProtectedRoute element={<AddRating />} />} />
             <Route path="/ratings/edit/:id" element={<ProtectedRoute element={<EditRating />} />} />
             <Route path="/ratings/delete/:id" element={<ProtectedRoute element={<DeleteRating />} />} />
+            <Route path="/category/:id/recipes" element={<RecipeList />} />
             <Route path="/ratings/:id" element={<ProtectedRoute element={<RatingDetail />} />} />
             <Route path="/recipe/:id/add-rating" element={<ProtectedRoute element={<AddRecipeRating />} />} />
             <Route path="/recipes/for-rating" element={<ProtectedRoute element={<RecipeListForRating />} />} />
             <Route path="/recipe/:id/ingredients" element={<ProtectedRoute element={<RecipeIngredients />} />} />
             <Route path="/locations" element={<ProtectedRoute element={<LocationList />} />} />
             <Route path="/nested-ingredients-list" element={<ProtectedRoute element={<NestedIngredientsList />} />} />
+            <Route path="/steps" element={<ProtectedRoute element={<AddStep/>} />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
       </AuthProvider>

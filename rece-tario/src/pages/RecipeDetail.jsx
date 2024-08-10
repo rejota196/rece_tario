@@ -11,33 +11,35 @@ const RecipeDetail = () => {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [commentAdded, setCommentAdded] = useState(0);  
 
   useEffect(() => {
     axios.get(`https://sandbox.academiadevelopers.com/reciperover/recipes/${id}/`)
       .then(response => {
         const recipeData = response.data;
         if (!recipeData.comments) {
-            recipeData.comments = [];
+          recipeData.comments = [];
         }
         setRecipe(recipeData);
         setLoading(false);
       })
       .catch(error => {
-        console.error(error);
-        setError(error.message);
+        console.error('Error al obtener la receta:', error);
+        setError('Error al cargar la receta.');
         setLoading(false);
       });
   }, [id]);
 
   const handleCommentAdded = (newComment) => {
-    setRecipe((prevRecipe) => ({
-        ...prevRecipe,
-        comments: prevRecipe.comments ? [...prevRecipe.comments, newComment] : [newComment],
+    setRecipe(prevRecipe => ({
+      ...prevRecipe,
+      comments: [...(prevRecipe.comments || []), newComment],
     }));
+    setCommentAdded(prev => prev + 1);  
   };
 
   if (loading) return <div className="notification is-info">Cargando...</div>;
-  if (error) return <div className="notification is-danger">Error: {error}</div>;
+  if (error) return <div className="notification is-danger">{error}</div>;
   if (!recipe) return <div className="notification is-warning">No se encontró la receta</div>;
 
   return (
@@ -63,16 +65,16 @@ const RecipeDetail = () => {
                     <p><strong>Ingredientes:</strong></p>
                     <ul>
                       {recipe.ingredients.map((ingredient, index) => (
-                        <li key={index}>{ingredient.name}: {ingredient.amount}</li>
+                        <li key={index}>
+                          {ingredient.name}: {ingredient.amount} {ingredient.measure}
+                        </li>
                       ))}
                     </ul>
+
                     <h2 className="title is-5">Comentarios</h2>
-                    {recipe && recipe.id ? (
-                      <AddComment recipeId={recipe.id} onCommentAdded={handleCommentAdded} />
-                    ) : (
-                      <div>Cargando comentarios...</div>
-                    )}
-                    <CommentsRecipeId recipeId={recipe.id} />
+
+                    <CommentsRecipeId key={commentAdded} recipeId={recipe.id} />
+                    <AddComment recipeId={recipe.id} onCommentAdded={handleCommentAdded} />
                   </div>
                 </div>
               </div>

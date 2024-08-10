@@ -1,23 +1,35 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../utils/axiosConfig';
 
 const CommentsRecipeId = ({ recipeId }) => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Cargar comentarios para la receta específica
   useEffect(() => {
-    axios.get(`/reciperover/comments/?recipe=${recipeId}`)
-      .then(response => {
+    const fetchComments = async () => {
+      try {
+        const response = await axiosInstance.get(`/reciperover/comments/?recipe=${recipeId}`);
         setComments(response.data.results || []);
-        setLoading(false);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error al cargar los comentarios:', error);
         setError(error.message);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    if (recipeId) {
+      fetchComments();
+    }
   }, [recipeId]);
+
+  useEffect(() => {
+    if (comments.length > 0) {
+      console.log('Comentarios actualizados:', comments);
+    }
+  }, [comments]);
 
   if (loading) return <div>Cargando comentarios...</div>;
   if (error) return <div>Error al cargar comentarios: {error}</div>;
