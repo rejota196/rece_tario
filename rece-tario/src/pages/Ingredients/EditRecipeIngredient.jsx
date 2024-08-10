@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosConfig';
 import Layout from '../Layout';
 
-const AddRecipeIngredient = () => {
+const EditRecipeIngredient = () => {
+  const { id } = useParams();
   const [recipe, setRecipe] = useState('');
   const [ingredient, setIngredient] = useState('');
   const [quantity, setQuantity] = useState('');
@@ -11,10 +12,23 @@ const AddRecipeIngredient = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    axiosInstance.get(`/reciperover/recipe-ingredients/${id}/`)
+      .then(response => {
+        setRecipe(response.data.recipe);
+        setIngredient(response.data.ingredient);
+        setQuantity(response.data.quantity);
+        setMeasure(response.data.measure);
+      })
+      .catch(error => {
+        setError(error.message);
+      });
+  }, [id]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axiosInstance.post('/reciperover/recipe-ingredients/', { recipe, ingredient, quantity, measure });
+      await axiosInstance.put(`/reciperover/recipe-ingredients/${id}/`, { recipe, ingredient, quantity, measure });
       navigate('/recipe-ingredients');
     } catch (error) {
       setError(error.message);
@@ -24,7 +38,7 @@ const AddRecipeIngredient = () => {
   return (
     <Layout>
       <div className="section">
-        <h1 className="title">Add Recipe Ingredient</h1>
+        <h1 className="title">Edit Recipe Ingredient</h1>
         {error && <div className="notification is-danger">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="field">
@@ -52,7 +66,7 @@ const AddRecipeIngredient = () => {
             </div>
           </div>
           <div className="control">
-            <button className="button is-primary" type="submit">Add Recipe Ingredient</button>
+            <button className="button is-primary" type="submit">Update Recipe Ingredient</button>
           </div>
         </form>
       </div>
@@ -60,4 +74,4 @@ const AddRecipeIngredient = () => {
   );
 };
 
-export default AddRecipeIngredient;
+export default EditRecipeIngredient;

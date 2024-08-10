@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosConfig';
 import Layout from '../Layout';
 
-const AddIngredients = () => {
-  const [name, setName] = useState('');
+const AddStep = () => {
+  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -12,8 +12,8 @@ const AddIngredients = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axiosInstance.post('/reciperover/ingredients/', { name, description });
-      navigate('/ingredients');
+      await axiosInstance.post('/reciperover/steps/', { title, description });
+      navigate('/steps');
     } catch (error) {
       setError(error.message);
     }
@@ -22,18 +22,18 @@ const AddIngredients = () => {
   return (
     <Layout>
       <div className="section">
-        <h1 className="title has-text-centered">Agregar Ingrediente</h1>
-        {error && <div className="notification is-danger has-text-centered">{error}</div>}
-        <form onSubmit={handleSubmit} className="form-styled">
+        <h1 className="title">Agregar Paso</h1>
+        {error && <div className="notification is-danger">{error}</div>}
+        <form onSubmit={handleSubmit}>
           <div className="field">
-            <label className="label" htmlFor="name">Nombre</label>
+            <label className="label" htmlFor="title">Título</label>
             <div className="control">
               <input
                 className="input"
-                id="name"
+                id="title"
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 required
               />
             </div>
@@ -46,11 +46,12 @@ const AddIngredients = () => {
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                required
               ></textarea>
             </div>
           </div>
           <div className="control">
-            <button className="button is-primary" type="submit">Agregar Ingrediente</button>
+            <button className="button is-primary" type="submit">Agregar</button>
           </div>
         </form>
       </div>
@@ -58,4 +59,4 @@ const AddIngredients = () => {
   );
 };
 
-export default AddIngredients;
+export default AddStep;

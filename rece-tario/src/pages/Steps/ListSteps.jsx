@@ -2,15 +2,15 @@ import { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosConfig';
 import Layout from '../Layout';
 
-export const CommentIngredients = () => {
-  const [ingredients, setIngredients] = useState([]);
+const StepList = () => {
+  const [steps, setSteps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axiosInstance.get('/reciperover/ingredients/')
+    axiosInstance.get('/reciperover/steps/')
       .then(response => {
-        setIngredients(Array.isArray(response.data) ? response.data : []);
+        setSteps(Array.isArray(response.data) ? response.data : []);
         setLoading(false);
       })
       .catch(error => {
@@ -19,16 +19,19 @@ export const CommentIngredients = () => {
       });
   }, []);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div>Cargando...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
     <Layout>
       <div className="section">
-        <h1 className="title">Ingredients</h1>
+        <h1 className="title">Pasos</h1>
         <ul>
-          {ingredients.map(ingredient => (
-            <li key={ingredient.id}>{ingredient.name}</li>
+          {steps.map(step => (
+            <li key={step.id}>
+              <strong>Título:</strong> {step.title} <br />
+              <strong>Descripción:</strong> {step.description}
+            </li>
           ))}
         </ul>
       </div>
@@ -36,4 +39,4 @@ export const CommentIngredients = () => {
   );
 };
 
-export default CommentIngredients;
+export default StepList;
