@@ -7,8 +7,19 @@ body {
 }
 
 .navbar {
-  background-color: #ffffff;
+  background-color: #add8e6 !important; /* Celeste suave, tono pastel */
   color: #333333;
+}
+
+.navbar .navbar-item,
+.navbar .navbar-link {
+  color: #333333; /* Color de texto predeterminado */
+}
+
+.navbar .navbar-item:hover,
+.navbar .navbar-link:hover {
+  background-color: #4B0082; /* Indigo para el hover en modo día */
+  color: #ffffff; /* Color del texto en hover */
 }
 
 /* Modo Oscuro */
@@ -18,18 +29,19 @@ body {
 }
 
 [data-theme="dark"] .navbar {
-  background-color: #1a1a1a;
+  background-color: #1a1a1a !important;
   color: #a6cf58;
 }
 
 [data-theme="dark"] .navbar .navbar-item,
 [data-theme="dark"] .navbar .navbar-link {
-  color: #f5f5f5;
+  color: #f5f5f5; /* Color de texto en modo oscuro */
 }
 
 [data-theme="dark"] .navbar .navbar-item:hover,
 [data-theme="dark"] .navbar .navbar-link:hover {
-  background-color: #242424;
+  background-color: #4B0082; /* Indigo para el hover en modo oscuro */
+  color: #ffffff; /* Color del texto en hover */
 }
 
 [data-theme="dark"] .navbar .button.is-light {
