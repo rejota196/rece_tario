@@ -9,25 +9,45 @@ import CommentsRecipeId from './Comments/CommentsRecipeId';
 const RecipeDetail = () => {
   const { id } = useParams(); 
   const [recipe, setRecipe] = useState(null);
+  const [ingredients, setIngredients] = useState([]);
+  const [measures, setMeasures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [commentAdded, setCommentAdded] = useState(0);  
 
   useEffect(() => {
-    axios.get(`https://sandbox.academiadevelopers.com/reciperover/recipes/${id}/`)
-      .then(response => {
-        const recipeData = response.data;
+    const fetchData = async () => {
+      try {
+        const recipeResponse = await axios.get(`https://sandbox.academiadevelopers.com/reciperover/recipes/${id}/`);
+        const recipeData = recipeResponse.data;
+
         if (!recipeData.comments) {
           recipeData.comments = [];
         }
         setRecipe(recipeData);
+        
+        // Obtener los detalles de los ingredientes basados en los IDs
+        const ingredientDetails = await Promise.all(
+          recipeData.ingredients.map(async (ingredientId) => {
+            const ingredientResponse = await axios.get(`https://sandbox.academiadevelopers.com/reciperover/ingredients/${ingredientId}/`);
+            return ingredientResponse.data;
+          })
+        );
+        setIngredients(ingredientDetails);
+
+        // Obtener las medidas disponibles
+        const measuresResponse = await axios.get('https://sandbox.academiadevelopers.com/reciperover/measures/');
+        setMeasures(measuresResponse.data);
+
         setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error al obtener la receta:', error);
-        setError('Error al cargar la receta.');
+      } catch (error) {
+        console.error('Error al obtener los datos:', error);
+        setError('Error al cargar los datos.');
         setLoading(false);
-      });
+      }
+    };
+
+    fetchData();
   }, [id]);
 
   const handleCommentAdded = (newComment) => {
@@ -64,11 +84,18 @@ const RecipeDetail = () => {
                     <p>{recipe.description}</p>
                     <p><strong>Ingredientes:</strong></p>
                     <ul>
-                      {recipe.ingredients.map((ingredient, index) => (
-                        <li key={index}>
-                          {ingredient.name}: {ingredient.amount} {ingredient.measure}
-                        </li>
-                      ))}
+                      {ingredients.length > 0 ? (
+                        ingredients.map((ingredient, index) => (
+                          <li key={index}>
+                            <strong>{ingredient.name || 'Ingrediente desconocido'}</strong>
+                            {ingredient.amount && ingredient.measure ? (
+                              <>: {ingredient.amount} {ingredient.measure}</>
+                            ) : null}
+                          </li>
+                        ))
+                      ) : (
+                        <li>No se encontraron detalles de los ingredientes.</li>
+                      )}
                     </ul>
 
                     <h2 className="title is-5">Comentarios</h2>
