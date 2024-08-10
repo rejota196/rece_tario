@@ -34,7 +34,7 @@ const RatingDetail = () => {
               <p className="title is-4">Comentario: {rating.comment}</p>
               <p className="subtitle is-6">Valoración: {rating.rating}</p>
               <p className="subtitle is-6">Receta: {rating.recipe}</p>
-              <p className="subtitle is-6">Autor: {rating.author}</p>
+              <p className="subtitle is-6">Autor (ID del Usuario): {rating.author}</p> {/* Mostrar el ID del autor */}
               <p className="subtitle is-6">Creado en: {rating.created_at}</p>
               <p className="subtitle is-6">Actualizado en: {rating.updated_at}</p>
             </div>

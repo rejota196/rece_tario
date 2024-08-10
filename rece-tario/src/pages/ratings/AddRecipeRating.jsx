@@ -1,14 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosConfig';
 import Layout from '../Layout';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const AddRecipeRating = () => {
-  const { id: recipeId } = useParams(); 
+  const { id: recipeId } = useParams();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [error, setError] = useState(null);
+  const { state: { user, isAuthenticated } } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      setError('Debe estar autenticado para agregar una valoración.');
+    }
+  }, [isAuthenticated, user]);
 
   const handleRatingClick = (value) => {
     setRating(value);
@@ -17,10 +25,16 @@ const AddRecipeRating = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!isAuthenticated || !user) {
+      alert('Debe estar autenticado para agregar una valoración.');
+      return;
+    }
+
     const ratingData = {
       rating: rating || 1, // Valor predeterminado
       comment: comment.trim(), // Eliminar espacios en blanco
-      recipe: parseInt(recipeId, 10)
+      recipe: parseInt(recipeId, 10),
+      author: user.id  // Se asegura de que el autor sea el usuario autenticado
     };
 
     console.log('Rating data being sent:', ratingData);

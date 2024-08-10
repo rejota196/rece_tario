@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosConfig';
 import Layout from '../Layout';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const AddRating = () => {
   const [rating, setRating] = useState(null);
@@ -10,11 +11,12 @@ const AddRating = () => {
   const [recipes, setRecipes] = useState([]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { state: { user, isAuthenticated } } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const response = await axiosInstance.get('/reciperover/recipes/?page_size=100'); // Ajustamos el page_size para traer más recetas
+        const response = await axiosInstance.get('/reciperover/recipes/?page_size=100');
         if (response.data && Array.isArray(response.data.results)) {
           setRecipes(response.data.results);
         } else {
@@ -31,6 +33,11 @@ const AddRating = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isAuthenticated) {
+      setError('Debe estar autenticado para agregar una valoración.');
+      return;
+    }
 
     const ratingData = {
       rating,
