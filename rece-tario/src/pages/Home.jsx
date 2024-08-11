@@ -131,11 +131,10 @@ const Home = () => {
             className="Modal"
             overlayClassName="Overlay"
           >
-            <h2 className="title has-text-centered">Opciones para {selectedRecipe.title}</h2>
+            <h2 className="title has-text-centered" style={{ color: 'black' }}>Opciones para {selectedRecipe.title}</h2>
             <div className="buttons is-centered">
               <Link className="button is-info" to={`/recipe/${selectedRecipe.id}`}>Ver Detalles</Link>
               <Link className="button is-primary" to={`/recipe/${selectedRecipe.id}/ingredients`}>Ver Ingredientes</Link>
-              <Link className="button is-success" to={`/recipe/${selectedRecipe.id}/add-rating`}>Valorar</Link>
               <Link className="button is-link" to={`/recipe/${selectedRecipe.id}/comments`}>Ver Comentarios</Link>
             </div>
             <button className="button is-light" onClick={closeModal}>Cerrar</button>

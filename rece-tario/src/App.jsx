@@ -50,6 +50,7 @@ const App = () => {
           <Route path="/recipe/:id/ingredients" element={<ProtectedRoute element={<RecipeIngredients />} />} />
           <Route path="/recipe/:id/add-rating" element={<ProtectedRoute element={<AddRecipeRating />} />} />
           <Route path="/recipes/for-rating" element={<ProtectedRoute element={<RecipeListForRating />} />} />
+          <Route path="/recipe/:id/comments" element={<ProtectedRoute element={<CommentsRecipeId recipeId={window.location.pathname.split('/').pop()} />} />} />
           
           {/* Categorías */}
           <Route path="/categories" element={<ProtectedRoute element={<CategoryList />} />} />
