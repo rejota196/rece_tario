@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.png'; // Importar logo
+import logo from '../assets/logologin.png'; 
 import { useAuth } from '../contexts/AuthContext';
 import './Navbar.css';
 
@@ -55,15 +55,7 @@ const Navbar = () => {
                 <div className="navbar-item has-dropdown is-hoverable">
                   <Link className="navbar-link" to="/ingredients">Ingredientes</Link>
                   <div className="navbar-dropdown">
-                    <Link className="navbar-item" to="/add-ingredients">Añadir Ingredientes</Link>
                     <Link className="navbar-item" to="/ingredients">Ver Ingredientes</Link>
-                  </div>
-                </div>
-                <div className="navbar-item has-dropdown is-hoverable">
-                  <Link className="navbar-link" to="/ratings">Valoraciones</Link>
-                  <div className="navbar-dropdown">
-                    <Link className="navbar-item" to="/add-rating">Añadir Valoración</Link>
-                    <Link className="navbar-item" to="/ratings">Ver Valoraciones</Link>
                   </div>
                 </div>
               </>

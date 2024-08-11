@@ -33,6 +33,11 @@ const AddComment = ({ recipeId, onCommentAdded }) => {
     }
   };
 
+  // Renderizamos condicionalmente solo si recipeId no es undefined
+  if (recipeId === undefined) {
+    return <div>Loading...</div>; // o cualquier otro fallback mientras se obtiene recipeId
+  }
+
   return (
     <div className="section">
       <div className="container">

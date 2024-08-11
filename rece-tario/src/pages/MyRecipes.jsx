@@ -5,65 +5,85 @@ import { AuthContext } from '../contexts/AuthContext';
 import defaultImage from '../assets/sin-foto.png';
 
 const MyRecipes = () => {
-  const { state: { user, isAuthenticated } } = useContext(AuthContext);
+  const { state: { token } } = useContext(AuthContext); // Extrae el token del contexto
   const [myRecipes, setMyRecipes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [recipeToDelete, setRecipeToDelete] = useState(null);
 
   useEffect(() => {
     const fetchMyRecipes = async (page) => {
-      console.log('User state:', user, 'Is authenticated:', isAuthenticated);
-      
-      if (!isAuthenticated || !user || !user.id) {
-        console.log('User is not authenticated or user ID is missing');
-        setError('Usuario no autenticado o información de usuario incompleta.');
-        setLoading(false);
+      if (!token) {
+        setError('No se ha podido obtener el token del usuario.');
         return;
       }
-  
+
       setLoading(true);
+
       try {
-        const response = await axiosInstance.get(`/reciperover/recipes/?owner=${user.id}&page=${page}`);
-        console.log('API Response:', response.data);
-        if (response.data && Array.isArray(response.data.results)) {
-          setMyRecipes(response.data.results);
-          setTotalPages(Math.ceil(response.data.count / 10));
+        // Obtener todas las recetas del usuario autenticado
+        const recipesResponse = await axiosInstance.get(`/reciperover/recipes/?page=${page}`, {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        });
+
+        const allRecipes = recipesResponse.data.results;
+        const totalRecipes = recipesResponse.data.count;
+
+        if (allRecipes.length > 0) {
+          setMyRecipes(allRecipes);
+          setTotalPages(Math.ceil(totalRecipes / 10));
           setError(null);
         } else {
-          setError('Formato de respuesta inesperado');
+          setError('No se encontraron recetas para este usuario.');
         }
       } catch (error) {
         console.error('Error fetching recipes:', error.response?.data || error.message);
-        setError(`Error al cargar tus recetas: ${error.response?.data?.detail || error.message}`);
+        setError(`Error al cargar las recetas del usuario: ${error.response?.data?.detail || error.message}`);
       } finally {
         setLoading(false);
       }
     };
-  
-    fetchMyRecipes(currentPage);
-  }, [user, isAuthenticated, currentPage]);
+
+    if (token) {
+      fetchMyRecipes(currentPage); // Llama a la API para obtener las recetas del usuario autenticado
+    }
+  }, [token, currentPage]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
   const handleDeleteRecipe = async (id) => {
+    setRecipeToDelete(id);
+    setShowConfirmModal(true);
+  };
+
+  const confirmDeleteRecipe = async () => {
     try {
-      await axiosInstance.delete(`/reciperover/recipes/${id}/`);
-      setMyRecipes(myRecipes.filter(recipe => recipe.id !== id));
+      await axiosInstance.delete(`/reciperover/recipes/${recipeToDelete}/`, {
+        headers: {
+          'Authorization': `Token ${token}`
+        }
+      });
+      setMyRecipes(myRecipes.filter(recipe => recipe.id !== recipeToDelete));
     } catch (error) {
       setError(`Error al eliminar la receta: ${error.response?.data?.detail || error.message}`);
+      setShowErrorModal(true);
+    } finally {
+      setShowConfirmModal(false);
+      setRecipeToDelete(null);
     }
   };
 
-  if (loading) return <div className="notification is-info">Cargando tus recetas...</div>;
-  if (error) return <div className="notification is-danger">Error: {error}</div>;
-
   return (
     <div className="section">
-      <h2 className="title is-4 has-text-centered">Mis Recetas</h2>
+      <h2 className="title is-4 has-text-centered">Recetas Recomendadas</h2>
       <div className="columns is-multiline">
         {myRecipes.length > 0 ? (
           myRecipes.map(recipe => (
@@ -79,16 +99,14 @@ const MyRecipes = () => {
                   <div className="buttons">
                     <Link className="button is-info" to={`/recipe/${recipe.id}`}>Ver Detalles</Link>
                     <Link className="button is-warning" to={`/edit-recipe/${recipe.id}`}>Editar</Link>
-                    {recipe.owner === user?.id && (
-                      <button className="button is-danger" onClick={() => handleDeleteRecipe(recipe.id)}>Eliminar</button>
-                    )}
+                    <button className="button is-danger" onClick={() => handleDeleteRecipe(recipe.id)}>Eliminar</button>
                   </div>
                 </div>
               </div>
             </div>
           ))
         ) : (
-          <p className="has-text-centered">No has agregado ninguna receta aún.</p>
+          <p className="has-text-centered">No se encontraron recetas para este usuario.</p>
         )}
       </div>
 
@@ -106,6 +124,39 @@ const MyRecipes = () => {
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {/* Modal de Confirmación de Eliminación */}
+      {showConfirmModal && (
+        <div className={`modal ${showConfirmModal ? 'is-active' : ''}`}>
+          <div className="modal-background"></div>
+          <div className="modal-content">
+            <div className="box">
+              <h4 className="title is-4">Confirmar Eliminación</h4>
+              <p>¿Estás seguro de que deseas eliminar esta receta?</p>
+              <div className="buttons mt-3">
+                <button className="button is-danger" onClick={confirmDeleteRecipe}>Eliminar</button>
+                <button className="button" onClick={() => setShowConfirmModal(false)}>Cancelar</button>
+              </div>
+            </div>
+          </div>
+          <button className="modal-close is-large" aria-label="close" onClick={() => setShowConfirmModal(false)}></button>
+        </div>
+      )}
+
+      {/* Modal de Error de Propietario */}
+      {showErrorModal && (
+        <div className={`modal ${showErrorModal ? 'is-active' : ''}`}>
+          <div className="modal-background"></div>
+          <div className="modal-content">
+            <div className="box">
+              <h4 className="title is-4">Error</h4>
+              <p>No mi Rey esta receta no es tusha.</p>
+              <button className="button is-primary mt-3" onClick={() => setShowErrorModal(false)}>Cerrar</button>
+            </div>
+          </div>
+          <button className="modal-close is-large" aria-label="close" onClick={() => setShowErrorModal(false)}></button>
         </div>
       )}
     </div>

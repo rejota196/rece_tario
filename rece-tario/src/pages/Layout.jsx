@@ -1,14 +1,18 @@
+import React from 'react';
 import PropTypes from 'prop-types';
 import Navbar from './Navbar';
+import { AuthProvider } from '../contexts/AuthContext';
 
 const Layout = ({ children }) => {
   return (
-    <div>
-      <Navbar />
-      <div className="container">
-        {children}
+    <AuthProvider>
+      <div>
+        <Navbar />
+        <div className="container">
+          {children}
+        </div>
       </div>
-    </div>
+    </AuthProvider>
   );
 };
 
