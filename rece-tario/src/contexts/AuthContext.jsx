@@ -35,56 +35,35 @@ function reducer(state, action) {
 
 function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, {
-    user: null,
-    token: null,
-    isAuthenticated: false,
+      user__id: localStorage.getItem("user__id"),
+      token: localStorage.getItem("authToken"),
+      isAuthenticated: localStorage.getItem("authToken") ? true : false,
   });
-
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
-      const token = localStorage.getItem("authToken");
-      const userString = localStorage.getItem("user");
-
-      if (userString) {
-        try {
-          const user = JSON.parse(userString);
-          if (token && user) {
-            dispatch({ type: ACTIONS.LOGIN, payload: { token, user } });
-          }
-        } catch (error) {
-          console.error("Error parsing user from localStorage:", error);
-        }
-      }
-    } else {
-      console.error("localStorage no está disponible");
-    }
-  }, []);
-
-  const actions = useMemo(() => ({
-    login: (token, user) => {
-      dispatch({ type: ACTIONS.LOGIN, payload: { token, user } });
-      localStorage.setItem("authToken", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      const origin = location.state?.from?.pathname || "/";
-      navigate(origin);
-    },
-    logout: () => {
-      dispatch({ type: ACTIONS.LOGOUT });
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("user");
-      navigate('/');
-    },
-  }), [navigate, location]);
-
-  const value = useMemo(() => ({ state, actions }), [state, actions]);
+  const actions = {
+      login: (token, user__id) => {
+          dispatch({
+              type: ACTIONS.LOGIN,
+              payload: { token, user__id },
+          });
+          localStorage.setItem("authToken", token);
+          localStorage.setItem("user__id", user__id);
+          const origin = location.state?.from?.pathname || "/";
+          navigate(origin);
+      },
+      logout: () => {
+          dispatch({ type: ACTIONS.LOGOUT });
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("user__id");
+      },
+  };
 
   return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+      <AuthContext.Provider value={{ state, actions }}>
+          {children}
+      </AuthContext.Provider>
   );
 }
 

@@ -16,8 +16,14 @@ const AddRecipe = () => {
   const [ingredientName, setIngredientName] = useState('');
   const [ingredientAmount, setIngredientAmount] = useState('');
   const [stepDescription, setStepDescription] = useState('');
+  const [servings, setServing] = useState('');
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+
+
+
+
 
   useEffect(() => {
     const fetchMeasures = async () => {
@@ -107,6 +113,7 @@ const AddRecipe = () => {
       recipeData.append('description', description);
       recipeData.append('preparation_time', preparationTime);
       recipeData.append('cooking_time', cookingTime);
+      recipeData.appennd('servings', servings);
       
       if (image) {
         recipeData.append('image', image);
@@ -118,6 +125,7 @@ const AddRecipe = () => {
         description,
         preparationTime,
         cookingTime,
+        servings,
       });
 
       const recipeResponse = await axiosInstance.post('/reciperover/recipes/', recipeData, {
@@ -213,6 +221,20 @@ const AddRecipe = () => {
                   type="number"
                   value={cookingTime}
                   onChange={(e) => setCookingTime(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="field">
+              <label className="label" htmlFor="servings">Porciones (en cantidad)</label>
+              <div className="control">
+                <input
+                  className="input"
+                  id="servings"
+                  type="number"
+                  value={servings}
+                  onChange={(e) => setServing(e.target.value)}
                   required
                 />
               </div>
