@@ -1,16 +1,16 @@
+import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/logologin.png'; 
+import logo from '../assets/logologin.png';
 import { useAuth } from '../contexts/AuthContext';
 import './Navbar.css';
-import { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
 
 const Navbar = () => {
   const { state: { isAuthenticated }, actions: { logout } } = useAuth();
   const navigate = useNavigate();
 
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true); // Cambia a 'true' para iniciar en modo noche
 
   const handleLogout = () => {
     logout();
@@ -32,10 +32,8 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    if (currentTheme === 'dark') {
-      setIsDarkMode(true);
-    }
+    // Asegurarse de que el modo noche esté activo al cargar la página
+    document.documentElement.setAttribute('data-theme', 'dark');
   }, []);
 
   return (
@@ -111,4 +109,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
