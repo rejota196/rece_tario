@@ -17,6 +17,8 @@ const AddRecipe = () => {
   const [ingredientQuantity, setIngredientQuantity] = useState('');
   const [stepDescription, setStepDescription] = useState('');
   const [servings, setServing] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -34,17 +36,33 @@ const AddRecipe = () => {
       }
     };
 
+    const fetchCategories = async () => {
+      try {
+        const response = await axiosInstance.get('/reciperover/categories/');
+        if (response.data && Array.isArray(response.data.results)) {
+          setCategories(response.data.results);
+        } else {
+          setError('Error al cargar las categorías.');
+        }
+      } catch (error) {
+        setError(`Error al cargar categorías: ${error.message}`);
+      }
+    };
+
     fetchMeasures();
+    fetchCategories();
   }, []);
 
   const handleAddIngredient = async () => {
     if (ingredientName && ingredientQuantity && selectedMeasure) {
       try {
+        // Primero creamos el ingrediente en el backend y obtenemos su ID real
         const ingredientResponse = await axiosInstance.post('/reciperover/ingredients/', {
           name: ingredientName,
         });
         const ingredientId = ingredientResponse.data.id;
 
+        // Luego, lo agregamos a la lista de ingredientes en el frontend usando el ID real
         setIngredients(prev => [
           ...prev,
           { id: ingredientId, name: ingredientName, quantity: ingredientQuantity, measure: selectedMeasure },
@@ -54,8 +72,8 @@ const AddRecipe = () => {
         setIngredientQuantity('');
         setSelectedMeasure('');
       } catch (error) {
-        console.error('Error al agregar ingrediente:', error);
-        alert('Error al agregar ingrediente.');
+        console.error('Error al agregar ingrediente:', error.response?.data || error.message);
+        alert(`Error al agregar ingrediente: ${JSON.stringify(error.response?.data || error.message)}`);
       }
     } else {
       alert('Por favor, complete todos los campos de ingredientes.');
@@ -86,20 +104,20 @@ const AddRecipe = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!title || !description || !preparationTime || !cookingTime) {
+    if (!title || !description || !preparationTime || !cookingTime || !selectedCategory) {
       alert('Por favor, complete todos los campos requeridos.');
       return;
     }
 
     try {
-      // 1. Crear la receta con los datos principales
       const recipeData = new FormData();
       recipeData.append('title', title);
       recipeData.append('description', description);
       recipeData.append('preparation_time', preparationTime);
       recipeData.append('cooking_time', cookingTime);
       recipeData.append('servings', servings);
-      
+      recipeData.append('category', selectedCategory);
+
       if (image) {
         recipeData.append('image', image);
       }
@@ -116,21 +134,21 @@ const AddRecipe = () => {
 
       const recipeId = recipeResponse.data.id;
 
-      // 2. Asociar los ingredientes con el ID de la receta
+      // Asociar los ingredientes con el ID de la receta
       for (const ingredient of ingredients) {
         await axiosInstance.post(`/reciperover/recipes/${recipeId}/ingredients/`, {
           quantity: ingredient.quantity,
           measure: ingredient.measure,
-          ingredient: ingredient.id,                     
+          ingredient: ingredient.id,
         });
       }
 
-      // 3. Asociar los pasos con el ID de la receta
+      // Asociar los pasos con el ID de la receta
       for (const [index, step] of steps.entries()) {
         await axiosInstance.post('/reciperover/steps/', {
           instruction: step.instruction,
           order: index + 1,
-          recipe: recipeId, // Asociar al ID de la receta
+          recipe: recipeId,
         });
       }
 
@@ -215,6 +233,27 @@ const AddRecipe = () => {
                   onChange={(e) => setServing(e.target.value)}
                   required
                 />
+              </div>
+            </div>
+
+            <div className="field">
+              <label className="label" htmlFor="category">Categoría</label>
+              <div className="control">
+                <div className="select">
+                  <select
+                    id="category"
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    required
+                  >
+                    <option value="">Seleccione una categoría</option>
+                    {categories.map(category => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
 
