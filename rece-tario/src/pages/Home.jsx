@@ -68,8 +68,17 @@ const Home = () => {
       <div className="section">
         <div className="container">
           <div className="hero">
-            <h1 className="title has-text-centered">Bienvenido a SI! Chef</h1>
-            <h2 className="subtitle has-text-centered">Descubre y comparte recetas increíbles</h2>
+          <h1 className="title has-text-centered has-text-weight-bold is-size-1" style={{ 
+  background: 'linear-gradient(to right, #ff7e5f, #feb47b)',
+  WebkitBackgroundClip: 'text',
+  color: 'transparent',
+  textShadow: '4px 4px 10px rgba(255, 255, 255, 0.7)', // Color blanco con opacidad para contrastar con el índigo
+  padding: '10px'
+}}>
+  Bienvenido a SI! Chef
+</h1>
+
+            <h2 className="subtitle has-text-centered mb-5">Descubre y comparte recetas increíbles</h2>
           </div>
           <div className="buttons is-centered">
             <button className="button is-primary" onClick={handleAddRecipe}>Agregar Receta</button>
