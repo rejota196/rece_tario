@@ -6,7 +6,7 @@ import defaultImage from '../assets/sin-foto.png';
 import CommentsRecipeId from './Comments/CommentsRecipeId';
 
 const RecipeDetail = () => {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [recipe, setRecipe] = useState(null);
   const [ingredients, setIngredients] = useState([]);
   const [steps, setSteps] = useState([]); 
@@ -16,6 +16,7 @@ const RecipeDetail = () => {
   const [rating, setRating] = useState(null); // Para almacenar la valoración seleccionada
   const [ratingId, setRatingId] = useState(null); // Para almacenar el ID de la valoración del usuario
   const [ratingError, setRatingError] = useState(null);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,6 +58,7 @@ const RecipeDetail = () => {
           }
         }
 
+
         setLoading(false);
       } catch (error) {
         console.error('Error al obtener los datos:', error);
@@ -67,6 +69,7 @@ const RecipeDetail = () => {
 
     fetchData();
   }, [id]);
+
 
   const handleRatingClick = async (value) => {
     setRating(value);
@@ -112,10 +115,11 @@ const RecipeDetail = () => {
       console.error('Error al actualizar la valoración:', error);
       setRatingError('Error al actualizar la valoración.');
     }
+
   };
 
   if (loading) return <div className="notification is-info">Cargando...</div>;
-  if (error) return <div className="notification is-danger">{error}</div>;
+  if (error) return <div className="notification is-danger">Error: {error}</div>;
   if (!recipe) return <div className="notification is-warning">No se encontró la receta</div>;
 
   return (
@@ -140,18 +144,9 @@ const RecipeDetail = () => {
                     <p>{recipe.description}</p>
                     <p><strong>Ingredientes:</strong></p>
                     <ul>
-                      {ingredients.length > 0 ? (
-                        ingredients.map((ingredient, index) => (
-                          <li key={index}>
-                            <strong>{ingredient.name || 'Ingrediente desconocido'}</strong>
-                            {ingredient.amount && ingredient.measure ? (
-                              <>: {ingredient.amount} {ingredient.measure}</>
-                            ) : null}
-                          </li>
-                        ))
-                      ) : (
-                        <li>No se encontraron detalles de los ingredientes.</li>
-                      )}
+                      {recipe.ingredients.map(ingredientId => (
+                        <li key={ingredientId}>{ingredients[ingredientId] || 'Cargando...'}</li>
+                      ))}
                     </ul>
 
                     <h2 className="title is-5">Pasos</h2>
@@ -180,6 +175,7 @@ const RecipeDetail = () => {
                       ))}
                     </div>
                     {ratingError && <div className="notification is-danger">{ratingError}</div>}
+
                   </div>
                 </div>
               </div>

@@ -14,6 +14,12 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Variables para la Navbar */
+  --navbar-bg-color-dark: #1a1a1a;
+  --navbar-bg-color-light: #cde5f2; /* celeste suave pastel */
+  --navbar-text-color-dark: #f5f5f5;
+  --navbar-text-color-light: #213547;
 }
 
 a {
@@ -77,6 +83,45 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+
+  /* Asegurar que los textos sean negros en modo día */
+  h1, h2, p, a, .card, .notification, .footer, .title.has-text-centered, .subtitle.has-text-centered {
+    color: #000000;
+  }
+
+  /* Cambiar el fondo del footer en modo día */
+  .footer {
+    background-color: #f0f0f0;
+    color: #000000;
+  }
+}
+
+/* Navbar estilos */
+.navbar {
+  background-color: var(--navbar-bg-color-dark);
+  color: var(--navbar-text-color-dark);
+  padding: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.navbar .navbar-item {
+  color: inherit;
+}
+
+.navbar.is-light {
+  background-color: var(--navbar-bg-color-light);
+  color: var(--navbar-text-color-light);
+}
+
+/* Cambios de modo oscuro/claro para la Navbar */
+.dark-mode .navbar {
+  background-color: var(--navbar-bg-color-dark);
+  color: var(--navbar-text-color-dark);
+}
+
+.light-mode .navbar {
+  background-color: var(--navbar-bg-color-light);
+  color: var(--navbar-text-color-light);
 }
 
 .section {
@@ -178,7 +223,7 @@ button:focus-visible {
 }
 
 .footer {
-  background-color: #1a1a1a;
+  background-color: #c300eb;
   color: #ffffff;
   padding: 2rem 1.5rem;
   text-align: center;
