@@ -6,6 +6,7 @@ import { AuthContext } from '../contexts/AuthContext';
 import axiosInstance from '../utils/axiosConfig';
 import Layout from './Layout';
 import MyRecipes from './MyRecipes';
+import './footer.css'; // Importar los estilos del footer
 
 const Home = () => {
   const [recipes, setRecipes] = useState([]);
@@ -65,15 +66,14 @@ const Home = () => {
   return (
     <Layout>
       <div className="section">
-
-      <div className="container">
-        <div className="hero">
-          <h1 className="title has-text-centered">Bienvenido a SI! Chef</h1>
-          <h2 className="subtitle has-text-centered">Descubre y comparte recetas increíbles</h2>
-        </div>
-        <div className="buttons is-centered">
-          <button className="button is-primary" onClick={handleAddRecipe}>Agregar Receta</button>
-        </div>
+        <div className="container">
+          <div className="hero">
+            <h1 className="title has-text-centered">Bienvenido a SI! Chef</h1>
+            <h2 className="subtitle has-text-centered">Descubre y comparte recetas increíbles</h2>
+          </div>
+          <div className="buttons is-centered">
+            <button className="button is-primary" onClick={handleAddRecipe}>Agregar Receta</button>
+          </div>
           <MyRecipes /> {/* Aquí se integra el componente Mis Recetas */}
 
           <h2 className="title is-4 has-text-centered">Recetas Populares</h2>
@@ -98,7 +98,7 @@ const Home = () => {
             ))}
           </div>
 
-          <div className="pagination is-centered">
+          <div className="pagination is-centered mb-6">
             <ul className="pagination-list">
               {[...Array(totalPages).keys()].map(page => (
                 <li key={page}>
@@ -133,7 +133,7 @@ const Home = () => {
           </Modal>
         )}
 
-        <footer className="footer">
+        <footer className="footer" >
           <div className="content has-text-centered">
             <div className="columns is-mobile">
               <div className="column is-half">
@@ -149,7 +149,6 @@ const Home = () => {
             </div>
           </div>
         </footer>
-
       </div>
     </Layout>
   );

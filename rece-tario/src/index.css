@@ -85,13 +85,7 @@ button:focus-visible {
   }
 
   /* Asegurar que los textos sean negros en modo día */
-  h1, h2, p, a, .card, .notification, .footer, .title.has-text-centered, .subtitle.has-text-centered {
-    color: #000000;
-  }
-
-  /* Cambiar el fondo del footer en modo día */
-  .footer {
-    background-color: #f0f0f0;
+  h1, h2, p, a, .card, .notification, .title.has-text-centered, .subtitle.has-text-centered {
     color: #000000;
   }
 }
@@ -220,15 +214,6 @@ button:focus-visible {
   background-color: #fff;
   color: #363636;
   border-color: #dbdbdb;
-}
-
-.footer {
-  background-color: #c300eb;
-  color: #ffffff;
-  padding: 2rem 1.5rem;
-  text-align: center;
-  width: 100%;
-  margin-top: auto;
 }
 
 /* Estilos para el modal */
