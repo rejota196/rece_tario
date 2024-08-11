@@ -5,6 +5,7 @@ import AddRecipe from './pages/AddRecipe';
 import EditRecipe from './pages/EditRecipe';
 import RecipeDetail from './pages/RecipeDetail';
 import RecipeList from './pages/RecipeList';
+import RecipeListByCategory from './pages/Categories/RecipeListByCategory'; 
 import AddRecipeRating from './pages/ratings/AddRecipeRating';
 import RecipeListForRating from './pages/ratings/RecipeListForRating';
 import RecipeIngredients from './pages/Ingredients/RecipeIngredients';
@@ -56,7 +57,7 @@ const App = () => {
           <Route path="/categories" element={<ProtectedRoute element={<CategoryList />} />} />
           <Route path="/add-category" element={<ProtectedRoute element={<AddCategory />} />} />
           <Route path="/edit-category/:id" element={<ProtectedRoute element={<EditCategory />} />} />
-          <Route path="/category/:id/recipes" element={<ProtectedRoute element={<RecipeList />} />} />
+          <Route path="/category/:id/recipes" element={<ProtectedRoute element={<RecipeListByCategory />} />} /> {/* Ruta modificada */}
 
           {/* Comentarios */}
           <Route path="/comments" element={<ProtectedRoute element={<CommentList />} />} />
