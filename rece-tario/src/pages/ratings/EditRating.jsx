@@ -12,21 +12,30 @@ const EditRating = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axiosInstance.get(`/reciperover/ratings/${id}/`)
-      .then(response => {
+    const fetchRating = async () => {
+      try {
+        const response = await axiosInstance.get(`/reciperover/ratings/${id}/`);
         setRating(response.data.rating);
         setComment(response.data.comment);
         setRecipe(response.data.recipe);
-      })
-      .catch(error => {
+      } catch (error) {
         setError(error.message);
-      });
+      }
+    };
+
+    fetchRating();
   }, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const ratingData = {
+      rating,
+      comment,
+      recipe,
+    };
+
     try {
-      await axiosInstance.put(`/reciperover/ratings/${id}/`, { rating, comment, recipe });
+      await axiosInstance.patch(`/reciperover/ratings/${id}/`, ratingData);
       navigate('/ratings');
     } catch (error) {
       setError(error.message);

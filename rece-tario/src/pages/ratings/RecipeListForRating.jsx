@@ -7,13 +7,31 @@ const RecipeListForRating = () => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [ratingsMap, setRatingsMap] = useState({});
 
   useEffect(() => {
-    const fetchRecipes = async () => {
+    const fetchRecipesAndRatings = async () => {
       try {
+        // Obtener todas las recetas
         const response = await axiosInstance.get('/reciperover/recipes/');
         if (response.data && Array.isArray(response.data.results)) {
           setRecipes(response.data.results);
+
+          // Crear un mapa de recetas con sus valoraciones
+          const newRatingsMap = {};
+          for (const recipe of response.data.results) {
+            const ratingResponse = await axiosInstance.get(`/reciperover/ratings/?recipe=${recipe.id}`);
+            if (ratingResponse.data && Array.isArray(ratingResponse.data.results)) {
+              const ratings = ratingResponse.data.results;
+              const averageRating = ratings.length > 0
+                ? ratings.reduce((sum, rating) => sum + rating.rating, 0) / ratings.length
+                : 0;
+              newRatingsMap[recipe.id] = averageRating;
+            } else {
+              newRatingsMap[recipe.id] = 0;
+            }
+          }
+          setRatingsMap(newRatingsMap);
         } else {
           setError('Unexpected response format');
         }
@@ -24,7 +42,7 @@ const RecipeListForRating = () => {
       }
     };
 
-    fetchRecipes();
+    fetchRecipesAndRatings();
   }, []);
 
   if (loading) return <div className="notification is-info">Cargando...</div>;
@@ -45,6 +63,14 @@ const RecipeListForRating = () => {
                 </div>
                 <div className="card-content">
                   <p className="title is-4">{recipe.title}</p>
+                  {/* Mostrar las estrellitas */}
+                  <div className="rating">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <span key={index} className={`star ${index < Math.round(ratingsMap[recipe.id]) ? 'is-primary' : 'is-light'}`}>
+                        ★
+                      </span>
+                    ))}
+                  </div>
                   <div className="buttons">
                     <Link className="button is-info" to={`/recipe/${recipe.id}`}>Ver Detalles</Link>
                     <Link className="button is-primary" to={`/recipe/${recipe.id}/add-rating`}>Valorar</Link>

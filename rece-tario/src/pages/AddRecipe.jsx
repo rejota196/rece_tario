@@ -2,68 +2,72 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosConfig';
 import Layout from './Layout';
-import PropTypes from 'prop-types';
 
 const AddRecipe = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [preparationTime, setPreparationTime] = useState('');
-  const [preparationTimeUnit, setPreparationTimeUnit] = useState('minutes');
   const [cookingTime, setCookingTime] = useState('');
-  const [cookingTimeUnit, setCookingTimeUnit] = useState('minutes');
-  const [servings, setServings] = useState(0);
-  const [image, setImage] = useState(null);
   const [ingredients, setIngredients] = useState([]);
-  const [newIngredientName, setNewIngredientName] = useState('');
-  const [newIngredientAmount, setNewIngredientAmount] = useState('');
+  const [steps, setSteps] = useState([]);
+  const [image, setImage] = useState(null);
   const [measures, setMeasures] = useState([]);
   const [selectedMeasure, setSelectedMeasure] = useState('');
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [newCategory, setNewCategory] = useState('');
-  const [locationQuery, setLocationQuery] = useState('');
-  const [locationSuggestions, setLocationSuggestions] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState('');
+  const [ingredientName, setIngredientName] = useState('');
+  const [ingredientAmount, setIngredientAmount] = useState('');
+  const [stepDescription, setStepDescription] = useState('');
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Cargar las medidas disponibles para los ingredientes y las categorías
   useEffect(() => {
-    const fetchMeasuresAndCategories = async () => {
+    const fetchMeasures = async () => {
       try {
-        const [measuresResponse, categoriesResponse] = await Promise.all([
-          axiosInstance.get('/reciperover/measures/'),
-          axiosInstance.get('/reciperover/categories/')
-        ]);
-
-        if (measuresResponse.data && Array.isArray(measuresResponse.data)) {
-          setMeasures(measuresResponse.data);
+        const response = await axiosInstance.get('/reciperover/measures/');
+        if (response.data && Array.isArray(response.data)) {
+          setMeasures(response.data);
+        } else {
+          setError('Error al cargar las medidas.');
         }
-
-        if (categoriesResponse.data && Array.isArray(categoriesResponse.data.results)) {
-          setCategories(categoriesResponse.data.results);
-        }
-
       } catch (error) {
-        setError(`Error al cargar datos: ${error.message}`);
+        setError(`Error al cargar medidas: ${error.message}`);
       }
     };
 
-    fetchMeasuresAndCategories();
+    fetchMeasures();
   }, []);
 
-  const handleAddIngredient = () => {
-    if (newIngredientName.trim() && selectedMeasure && newIngredientAmount) {
-      const newIngredientObj = {
-        id: Date.now(),
-        name: newIngredientName,
-        amount: newIngredientAmount,
-        measure: selectedMeasure,
-      };
-      setIngredients(prev => [...prev, newIngredientObj]);
-      setNewIngredientName('');
-      setNewIngredientAmount('');
-      setSelectedMeasure('');
+  const handleAddIngredient = async () => {
+    if (ingredientName && ingredientAmount && selectedMeasure) {
+      try {
+        // Verificar si el ingrediente ya existe
+        const existingIngredientResponse = await axiosInstance.get(`/reciperover/ingredients/?search=${ingredientName}`);
+        let ingredientId;
+        if (existingIngredientResponse.data && existingIngredientResponse.data.results.length > 0) {
+          // Si el ingrediente ya existe, tomamos su ID
+          ingredientId = existingIngredientResponse.data.results[0].id;
+        } else {
+          // Si no existe, lo creamos
+          const ingredientResponse = await axiosInstance.post('/reciperover/ingredients/', {
+            name: ingredientName,
+            amount: ingredientAmount,
+            measure: selectedMeasure,
+          });
+          ingredientId = ingredientResponse.data.id;
+        }
+        // Añadir el ingrediente con su ID
+        setIngredients(prev => [
+          ...prev,
+          { id: ingredientId, name: ingredientName, amount: ingredientAmount, measure: selectedMeasure },
+        ]);
+        setIngredientName('');
+        setIngredientAmount('');
+        setSelectedMeasure('');
+      } catch (error) {
+        console.error('Error al agregar ingrediente:', error);
+        alert('Error al agregar ingrediente.');
+      }
+    } else {
+      alert('Por favor, complete todos los campos de ingredientes.');
     }
   };
 
@@ -71,26 +75,17 @@ const AddRecipe = () => {
     setIngredients(prev => prev.filter(ingredient => ingredient.id !== id));
   };
 
-  const handleAddCategory = () => {
-    if (newCategory.trim()) {
-      setSelectedCategory(newCategory);
-      setNewCategory('');
+  const handleAddStep = () => {
+    if (stepDescription) {
+      setSteps(prev => [...prev, { id: Date.now(), instruction: stepDescription }]);
+      setStepDescription('');
+    } else {
+      alert('Por favor, escriba un paso para la receta.');
     }
   };
 
-  const handleLocationSearch = async () => {
-    try {
-      // Llamada a una API de geocodificación o autocompletado de ubicación
-      const response = await axiosInstance.get(`/geocode-api/?query=${locationQuery}`);
-      setLocationSuggestions(response.data || []);
-    } catch (error) {
-      console.error('Error al buscar ubicaciones:', error.message);
-    }
-  };
-
-  const handleSelectLocation = (location) => {
-    setSelectedLocation(location);
-    setLocationSuggestions([]);
+  const handleRemoveStep = (id) => {
+    setSteps(prev => prev.filter(step => step.id !== id));
   };
 
   const handleImageChange = (e) => {
@@ -100,43 +95,57 @@ const AddRecipe = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!title || !description || !preparationTime || !cookingTime) {
+      alert('Por favor, complete todos los campos requeridos.');
+      return;
+    }
+
     try {
-      const ingredientIds = [];
-      for (const ingredient of ingredients) {
-        const response = await axiosInstance.post('/reciperover/ingredients/', {
-          name: ingredient.name,
-          amount: ingredient.amount,
-          measure: ingredient.measure,
-        });
-        ingredientIds.push(response.data.id);
+      // 1. Crear la receta con los datos principales
+      const recipeData = new FormData();
+      recipeData.append('title', title);
+      recipeData.append('description', description);
+      recipeData.append('preparation_time', preparationTime);
+      recipeData.append('cooking_time', cookingTime);
+      
+      if (image) {
+        recipeData.append('image', image);
       }
 
-      const convertTimeToMinutes = (time, unit) => {
-        switch (unit) {
-          case 'hours':
-            return time * 60;
-          case 'days':
-            return time * 60 * 24;
-          default:
-            return time;
-        }
-      };
-
-      const recipeData = {
+      // Verificar que los datos se hayan agregado correctamente al FormData
+      console.log('Datos de la receta:', {
         title,
         description,
-        preparation_time: convertTimeToMinutes(Number(preparationTime), preparationTimeUnit),
-        cooking_time: convertTimeToMinutes(Number(cookingTime), cookingTimeUnit),
-        servings,
-        ingredients: ingredientIds,
-        location_name: selectedLocation.name,
-        categories: selectedCategory ? [selectedCategory] : [],
-      };
+        preparationTime,
+        cookingTime,
+      });
 
-      const recipeResponse = await axiosInstance.post('/reciperover/recipes/', recipeData);
+      const recipeResponse = await axiosInstance.post('/reciperover/recipes/', recipeData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
       if (recipeResponse.status !== 201) {
         throw new Error(`Failed to add recipe: ${recipeResponse.statusText}`);
+      }
+
+      const recipeId = recipeResponse.data.id;
+
+      // 2. Asociar los ingredientes con el ID de la receta
+      for (const ingredient of ingredients) {
+        await axiosInstance.put(`/reciperover/recipes/${recipeId}/`, {
+          ingredients: [...ingredients.map(ing => ing.id)],
+        });
+      }
+
+      // 3. Asociar los pasos con el ID de la receta
+      for (const [index, step] of steps.entries()) {
+        await axiosInstance.post('/reciperover/steps/', {
+          instruction: step.instruction,
+          order: index + 1,
+          recipe: recipeId, // Asociar al ID de la receta
+        });
       }
 
       alert('Receta añadida con éxito');
@@ -155,7 +164,7 @@ const AddRecipe = () => {
           {error && <div className="notification is-danger has-text-centered">{error}</div>}
           <form onSubmit={handleSubmit} className="box">
             <div className="field">
-              <label className="label" htmlFor="title">Título</label>
+              <label className="label" htmlFor="title">Nombre de la Receta</label>
               <div className="control">
                 <input
                   className="input"
@@ -167,6 +176,7 @@ const AddRecipe = () => {
                 />
               </div>
             </div>
+
             <div className="field">
               <label className="label" htmlFor="description">Descripción</label>
               <div className="control">
@@ -175,189 +185,165 @@ const AddRecipe = () => {
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  required
                 ></textarea>
               </div>
             </div>
+
             <div className="field">
-              <label className="label">Tiempo de Preparación</label>
-              <div className="field has-addons">
-                <div className="control">
-                  <input
-                    className="input"
-                    type="text"
-                    value={preparationTime}
-                    onChange={(e) => setPreparationTime(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="control">
-                  <div className="select">
-                    <select
-                      value={preparationTimeUnit}
-                      onChange={(e) => setPreparationTimeUnit(e.target.value)}
-                    >
-                      <option value="minutes">Minutos</option>
-                      <option value="hours">Horas</option>
-                      <option value="days">Días</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="field">
-              <label className="label">Tiempo de Cocción</label>
-              <div className="field has-addons">
-                <div className="control">
-                  <input
-                    className="input"
-                    type="text"
-                    value={cookingTime}
-                    onChange={(e) => setCookingTime(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="control">
-                  <div className="select">
-                    <select
-                      value={cookingTimeUnit}
-                      onChange={(e) => setCookingTimeUnit(e.target.value)}
-                    >
-                      <option value="minutes">Minutos</option>
-                      <option value="hours">Horas</option>
-                      <option value="days">Días</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="field">
-              <label className="label" htmlFor="servings">Porciones</label>
+              <label className="label" htmlFor="preparationTime">Tiempo de Preparación (en minutos)</label>
               <div className="control">
                 <input
                   className="input"
-                  id="servings"
+                  id="preparationTime"
                   type="number"
-                  value={servings}
-                  onChange={(e) => setServings(Number(e.target.value))}
+                  value={preparationTime}
+                  onChange={(e) => setPreparationTime(e.target.value)}
                   required
                 />
               </div>
             </div>
+
             <div className="field">
-              <label className="label" htmlFor="ingredients">Ingredientes</label>
+              <label className="label" htmlFor="cookingTime">Tiempo de Cocción (en minutos)</label>
               <div className="control">
                 <input
-                  className="input mt-2"
-                  type="text"
-                  value={newIngredientName}
-                  onChange={(e) => setNewIngredientName(e.target.value)}
-                  placeholder="Añadir nuevo ingrediente"
+                  className="input"
+                  id="cookingTime"
+                  type="number"
+                  value={cookingTime}
+                  onChange={(e) => setCookingTime(e.target.value)}
+                  required
                 />
-                <input
-                  className="input mt-2"
-                  type="text"
-                  value={newIngredientAmount}
-                  onChange={(e) => setNewIngredientAmount(e.target.value)}
-                  placeholder="Cantidad del ingrediente"
-                />
-                <div className="select mt-2">
-                  <select
-                    id="measure"
-                    value={selectedMeasure}
-                    onChange={(e) => setSelectedMeasure(e.target.value)}
-                    required
-                  >
-                    <option value="">Seleccione una medida</option>
-                    {measures.map((measure) => (
-                      <option key={measure.key} value={measure.key}>
-                        {measure.value}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <button
-                  type="button"
-                  className="button is-link mt-2"
-                  onClick={handleAddIngredient}
-                >
-                  Agregar Ingrediente
-                </button>
-                <div className="mt-2">
-                  <ul>
-                    {ingredients.map((ingredient) => (
-                      <li key={ingredient.id}>
-                        {ingredient.name}: {ingredient.amount} {ingredient.measure}
-                        <button
-                          type="button"
-                          className="delete"
-                          onClick={() => handleRemoveIngredient(ingredient.id)}
-                        ></button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
               </div>
             </div>
+
             <div className="field">
-              <label className="label" htmlFor="location">Ubicación</label>
-              <div className="control">
-                <input
-                  className="input mt-2"
-                  type="text"
-                  value={locationQuery}
-                  onChange={(e) => setLocationQuery(e.target.value)}
-                  placeholder="Buscar ubicación"
-                  onBlur={handleLocationSearch}
-                />
-                <ul className="mt-2">
-                  {locationSuggestions.map((location, index) => (
-                    <li
-                      key={index}
-                      onClick={() => handleSelectLocation(location)}
-                      style={{ cursor: 'pointer', marginBottom: '5px' }}
+              <h3 className="title is-4">Agregar Ingrediente</h3>
+              <div className="field is-grouped">
+                <div className="control is-expanded">
+                  <input
+                    className="input"
+                    id="ingredientName"
+                    type="text"
+                    placeholder="Nombre del ingrediente"
+                    value={ingredientName}
+                    onChange={(e) => setIngredientName(e.target.value)}
+                  />
+                </div>
+                <div className="control">
+                  <input
+                    className="input"
+                    id="ingredientAmount"
+                    type="text"
+                    placeholder="Cantidad"
+                    value={ingredientAmount}
+                    onChange={(e) => setIngredientAmount(e.target.value)}
+                  />
+                </div>
+                <div className="control">
+                  <div className="select">
+                    <select
+                      id="ingredientMeasure"
+                      value={selectedMeasure}
+                      onChange={(e) => setSelectedMeasure(e.target.value)}
                     >
-                      {location.name}
-                    </li>
-                  ))}
-                </ul>
-                {selectedLocation && (
-                  <p className="mt-2">Ubicación seleccionada: {selectedLocation.name}</p>
-                )}
-              </div>
-            </div>
-            <div className="field">
-              <label className="label" htmlFor="categories">Categorías</label>
-              <div className="control">
-                <div className="select">
-                  <select
-                    id="categories"
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                  >
-                    <option value="">Seleccione una categoría</option>
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
+                      <option value="">Seleccione una medida</option>
+                      {measures.map(measure => (
+                        <option key={measure.key} value={measure.key}>
+                          {measure.value}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <input
-                  className="input mt-2"
-                  type="text"
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  placeholder="Añadir nueva categoría"
-                />
-                <button
-                  type="button"
-                  className="button is-link mt-2"
-                  onClick={handleAddCategory}
-                >
-                  Agregar Categoría
-                </button>
+                <div className="control">
+                  <button type="button" className="button is-primary" onClick={handleAddIngredient}>
+                    Agregar
+                  </button>
+                </div>
+              </div>
+
+              <div className="table-container">
+                <table className="table is-fullwidth is-striped">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Cantidad</th>
+                      <th>Medida</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ingredients.map((ingredient) => (
+                      <tr key={ingredient.id}>
+                        <td>{ingredient.name}</td>
+                        <td>{ingredient.amount}</td>
+                        <td>{ingredient.measure}</td>
+                        <td>
+                          <button
+                            className="button is-danger is-small"
+                            onClick={() => handleRemoveIngredient(ingredient.id)}
+                          >
+                            Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
+
+            <div className="field">
+              <h3 className="title is-4">Agregar Paso</h3>
+              <div className="field has-addons">
+                <div className="control is-expanded">
+                  <input
+                    className="input"
+                    id="stepDescription"
+                    type="text"
+                    placeholder="Descripción del paso"
+                    value={stepDescription}
+                    onChange={(e) => setStepDescription(e.target.value)}
+                  />
+                </div>
+                <div className="control">
+                  <button type="button" className="button is-primary" onClick={handleAddStep}>
+                    Agregar
+                  </button>
+                </div>
+              </div>
+
+              <div className="table-container">
+                <table className="table is-fullwidth is-striped">
+                  <thead>
+                    <tr>
+                      <th>Orden</th>
+                      <th>Descripción</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {steps.map((step, index) => (
+                      <tr key={step.id}>
+                        <td>{index + 1}</td>
+                        <td>{step.instruction}</td>
+                        <td>
+                          <button
+                            className="button is-danger is-small"
+                            onClick={() => handleRemoveStep(step.id)}
+                          >
+                            Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
             <div className="field">
               <label className="label" htmlFor="image">Imagen</label>
               <div className="control">
@@ -369,6 +355,7 @@ const AddRecipe = () => {
                 />
               </div>
             </div>
+
             <div className="field is-grouped is-grouped-centered">
               <div className="control">
                 <button className="button is-primary" type="submit">

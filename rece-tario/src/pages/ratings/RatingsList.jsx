@@ -5,7 +5,7 @@ import Layout from '../Layout';
 import { AuthContext } from '../../contexts/AuthContext';
 import defaultImage from '../../assets/sin-foto.png';
 
-const RatingsList = () => {
+const RatingsList = ({ refresh }) => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,7 +33,7 @@ const RatingsList = () => {
     };
 
     fetchRecipes(currentPage);
-  }, [currentPage]);
+  }, [currentPage, refresh]); // Dependencia 'refresh' para actualizar al añadir/eliminar valoraciones
 
   const openModal = (rating) => {
     setSelectedRating(rating);
@@ -48,10 +48,12 @@ const RatingsList = () => {
   const handleDeleteRating = async (id) => {
     try {
       await axiosInstance.delete(`/reciperover/ratings/${id}/`);
-      setRecipes(recipes.map(recipe => ({
-        ...recipe,
-        ratings: recipe.ratings.filter(rating => rating.id !== id)
-      })));
+      setRecipes(prevRecipes => 
+        prevRecipes.map(recipe => ({
+          ...recipe,
+          ratings: recipe.ratings.filter(rating => rating.id !== id)
+        }))
+      );
     } catch (error) {
       console.error('Failed to delete rating:', error);
     }
@@ -69,22 +71,20 @@ const RatingsList = () => {
     }
   };
 
-  const renderRatingButtons = (rating) => {
-    return (
-      <div className="rating-buttons">
-        {[1, 2, 3, 4, 5].map((value) => (
-          <button
-            key={value}
-            type="button"
-            className={`button ${rating === value ? 'is-primary' : 'is-light'}`}
-            disabled
-          >
-            {value} ★
-          </button>
-        ))}
-      </div>
-    );
-  };
+  const renderRatingButtons = (rating) => (
+    <div className="rating-buttons">
+      {[1, 2, 3, 4, 5].map((value) => (
+        <button
+          key={value}
+          type="button"
+          className={`button ${rating === value ? 'is-primary' : 'is-light'}`}
+          disabled
+        >
+          {value} ★
+        </button>
+      ))}
+    </div>
+  );
 
   if (loading) return <div className="notification is-info">Cargando...</div>;
   if (error) return <div className="notification is-danger">Error: {error}</div>;
@@ -110,11 +110,10 @@ const RatingsList = () => {
                     {recipe.ratings && recipe.ratings.length > 0 ? (
                       recipe.ratings.map(rating => (
                         <div key={rating.id} className="box">
-                          <p className="title is-6">{rating.comment}</p>
                           <div className="subtitle is-6">{renderRatingButtons(rating.rating)}</div>
                           <div className="buttons">
                             <button className="button is-info" onClick={() => openModal(rating)}>Ver Detalles</button>
-                            {isAuthenticated && user && rating.author === user.id && (  // Verificar si es el autor antes de mostrar el botón de eliminar
+                            {isAuthenticated && user && rating.author === user.id && (
                               <button className="button is-danger" onClick={() => handleDeleteRating(rating.id)}>Eliminar</button>
                             )}
                           </div>
@@ -158,7 +157,6 @@ const RatingsList = () => {
         >
           <div className="box">
             <h2 className="title has-text-centered">Detalle de Valoración</h2>
-            <p><strong>Comentario:</strong> {selectedRating.comment}</p>
             <div><strong>Valoración:</strong> {renderRatingButtons(selectedRating.rating)}</div>
             <p><strong>Autor (ID):</strong> {selectedRating.author}</p>
             <button className="button is-light" onClick={closeModal}>Cerrar</button>

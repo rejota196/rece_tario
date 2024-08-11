@@ -19,7 +19,6 @@ const RecipeList = () => {
   const fetchRecipes = async (page) => {
     setLoading(true);
     try {
-      // Verifica que el endpoint esté configurado para aceptar filtrado por categoría
       const response = await axios.get(`https://sandbox.academiadevelopers.com/reciperover/recipes/?category_id=${id}&ordering=-created_at&page=${page}`);
       if (response.data && Array.isArray(response.data.results)) {
         setRecipes(response.data.results);

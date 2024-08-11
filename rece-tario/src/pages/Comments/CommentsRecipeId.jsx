@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosConfig';
+import AddComment from './AddComment'; // Importa AddComment
 
 const CommentsRecipeId = ({ recipeId }) => {
   const [comments, setComments] = useState([]);
@@ -31,11 +32,20 @@ const CommentsRecipeId = ({ recipeId }) => {
     }
   }, [comments]);
 
+  const handleCommentAdded = (newComment) => {
+    setComments(prevComments => [newComment, ...prevComments]);
+  };
+
   if (loading) return <div>Cargando comentarios...</div>;
   if (error) return <div>Error al cargar comentarios: {error}</div>;
 
   return (
     <div className="section">
+      <h2 className="title">Comentarios</h2>
+      
+      {/* Renderiza AddComment aquí */}
+
+
       <table className="table is-fullwidth is-striped">
         <thead>
           <tr>
@@ -51,7 +61,9 @@ const CommentsRecipeId = ({ recipeId }) => {
             </tr>
           ))}
         </tbody>
+        
       </table>
+      <AddComment recipeId={recipeId} onCommentAdded={handleCommentAdded} />
     </div>
   );
 };

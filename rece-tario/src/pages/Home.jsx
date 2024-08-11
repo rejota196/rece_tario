@@ -76,7 +76,7 @@ const Home = () => {
         </div>
           <MyRecipes /> {/* Aquí se integra el componente Mis Recetas */}
 
-          <h2 className="title is-4 has-text-centered">Recetas Populares</h2>
+          <h2 className="title is-4 has-text-centered">Todas las Recetas</h2>
           <div className="columns is-multiline">
             {popularRecipes.map(recipe => (
               <div key={recipe.id} className="column is-one-third">
