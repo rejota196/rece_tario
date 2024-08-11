@@ -1,45 +1,73 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import Layout from './Layout'; 
-import defaultImage from '../assets/sin-foto.png'; 
+import Layout from './Layout';
+import defaultImage from '../assets/sin-foto.png';
 import AddComment from './Comments/AddComment';
 import CommentsRecipeId from './Comments/CommentsRecipeId';
 
 const RecipeDetail = () => {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [recipe, setRecipe] = useState(null);
+  const [ingredients, setIngredients] = useState([]);
+  const [measures, setMeasures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [commentAdded, setCommentAdded] = useState(0);  
+  const [commentAdded, setCommentAdded] = useState(0);
 
   useEffect(() => {
-    axios.get(`https://sandbox.academiadevelopers.com/reciperover/recipes/${id}/`)
-      .then(response => {
-        const recipeData = response.data;
+    const fetchData = async () => {
+      try {
+        const recipeResponse = await axios.get(`https://sandbox.academiadevelopers.com/reciperover/recipes/${id}/`);
+        const recipeData = recipeResponse.data;
+
         if (!recipeData.comments) {
           recipeData.comments = [];
         }
         setRecipe(recipeData);
         setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error al obtener la receta:', error);
-        setError('Error al cargar la receta.');
+      } catch (error) {
+        console.error('Error al obtener los datos:', error);
+        setError('Error al cargar los datos.');
         setLoading(false);
-      });
+      }
+    };
+
+    fetchData();
   }, [id]);
 
+  useEffect(() => {
+    const fetchIngredients = async () => {
+      const newIngredientsMap = {};
+      try {
+        for (const ingredientId of recipe.ingredients) {
+          console.log(ingredientId)
+          const response = await axios.get(`https://sandbox.academiadevelopers.com/reciperover/ingredients/${ingredientId}/`);
+          if (response.data) {
+            newIngredientsMap[response.data.id] = response.data.name;
+          }
+          
+        }
+        setIngredients(newIngredientsMap);
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+
+    if (recipe && recipe.ingredients) {
+      fetchIngredients();
+    }
+  }, [recipe]);
+
   const handleCommentAdded = (newComment) => {
-    setRecipe(prevRecipe => ({
+    setRecipe((prevRecipe) => ({
       ...prevRecipe,
-      comments: [...(prevRecipe.comments || []), newComment],
+      comments: prevRecipe.comments ? [...prevRecipe.comments, newComment] : [newComment],
     }));
-    setCommentAdded(prev => prev + 1);  
   };
 
   if (loading) return <div className="notification is-info">Cargando...</div>;
-  if (error) return <div className="notification is-danger">{error}</div>;
+  if (error) return <div className="notification is-danger">Error: {error}</div>;
   if (!recipe) return <div className="notification is-warning">No se encontró la receta</div>;
 
   return (
@@ -64,17 +92,17 @@ const RecipeDetail = () => {
                     <p>{recipe.description}</p>
                     <p><strong>Ingredientes:</strong></p>
                     <ul>
-                      {recipe.ingredients.map((ingredient, index) => (
-                        <li key={index}>
-                          {ingredient.name}: {ingredient.amount} {ingredient.measure}
-                        </li>
+                      {recipe.ingredients.map(ingredientId => (
+                        <li key={ingredientId}>{ingredients[ingredientId] || 'Cargando...'}</li>
                       ))}
                     </ul>
-
                     <h2 className="title is-5">Comentarios</h2>
-
-                    <CommentsRecipeId key={commentAdded} recipeId={recipe.id} />
-                    <AddComment recipeId={recipe.id} onCommentAdded={handleCommentAdded} />
+                    {recipe && recipe.id ? (
+                      <AddComment recipeId={recipe.id} onCommentAdded={handleCommentAdded} />
+                    ) : (
+                      <div>Cargando comentarios...</div>
+                    )}
+                    <CommentsRecipeId recipeId={recipe.id} />
                   </div>
                 </div>
               </div>
