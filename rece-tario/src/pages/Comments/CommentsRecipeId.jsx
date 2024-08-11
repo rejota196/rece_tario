@@ -48,7 +48,6 @@ const CommentsRecipeId = () => {
   if (error) return <div>Error al cargar comentarios: {error}</div>;
 
   return (
-    <Layout>
     <div className="section">
       <h2 className="title">Comentarios</h2>
 
@@ -77,7 +76,6 @@ const CommentsRecipeId = () => {
       
       <AddComment recipeId={recipeId} onCommentAdded={handleCommentAdded} />
     </div>
-    </Layout>
   );
 };
 
