@@ -14,16 +14,11 @@ const AddRecipe = () => {
   const [measures, setMeasures] = useState([]);
   const [selectedMeasure, setSelectedMeasure] = useState('');
   const [ingredientName, setIngredientName] = useState('');
-  const [ingredientAmount, setIngredientAmount] = useState('');
+  const [ingredientQuantity, setIngredientQuantity] = useState('');
   const [stepDescription, setStepDescription] = useState('');
   const [servings, setServing] = useState('');
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-
-
-
-
-
 
   useEffect(() => {
     const fetchMeasures = async () => {
@@ -43,30 +38,20 @@ const AddRecipe = () => {
   }, []);
 
   const handleAddIngredient = async () => {
-    if (ingredientName && ingredientAmount && selectedMeasure) {
+    if (ingredientName && ingredientQuantity && selectedMeasure) {
       try {
-        // Verificar si el ingrediente ya existe
-        const existingIngredientResponse = await axiosInstance.get(`/reciperover/ingredients/?search=${ingredientName}`);
-        let ingredientId;
-        if (existingIngredientResponse.data && existingIngredientResponse.data.results.length > 0) {
-          // Si el ingrediente ya existe, tomamos su ID
-          ingredientId = existingIngredientResponse.data.results[0].id;
-        } else {
-          // Si no existe, lo creamos
-          const ingredientResponse = await axiosInstance.post('/reciperover/ingredients/', {
-            name: ingredientName,
-            amount: ingredientAmount,
-            measure: selectedMeasure,
-          });
-          ingredientId = ingredientResponse.data.id;
-        }
-        // Añadir el ingrediente con su ID
+        const ingredientResponse = await axiosInstance.post('/reciperover/ingredients/', {
+          name: ingredientName,
+        });
+        const ingredientId = ingredientResponse.data.id;
+
         setIngredients(prev => [
           ...prev,
-          { id: ingredientId, name: ingredientName, amount: ingredientAmount, measure: selectedMeasure },
+          { id: ingredientId, name: ingredientName, quantity: ingredientQuantity, measure: selectedMeasure },
         ]);
+
         setIngredientName('');
-        setIngredientAmount('');
+        setIngredientQuantity('');
         setSelectedMeasure('');
       } catch (error) {
         console.error('Error al agregar ingrediente:', error);
@@ -113,20 +98,11 @@ const AddRecipe = () => {
       recipeData.append('description', description);
       recipeData.append('preparation_time', preparationTime);
       recipeData.append('cooking_time', cookingTime);
-      recipeData.appennd('servings', servings);
+      recipeData.append('servings', servings);
       
       if (image) {
         recipeData.append('image', image);
       }
-
-      // Verificar que los datos se hayan agregado correctamente al FormData
-      console.log('Datos de la receta:', {
-        title,
-        description,
-        preparationTime,
-        cookingTime,
-        servings,
-      });
 
       const recipeResponse = await axiosInstance.post('/reciperover/recipes/', recipeData, {
         headers: {
@@ -142,8 +118,10 @@ const AddRecipe = () => {
 
       // 2. Asociar los ingredientes con el ID de la receta
       for (const ingredient of ingredients) {
-        await axiosInstance.put(`/reciperover/recipes/${recipeId}/`, {
-          ingredients: [...ingredients.map(ing => ing.id)],
+        await axiosInstance.post(`/reciperover/recipes/${recipeId}/ingredients/`, {
+          quantity: ingredient.quantity,
+          measure: ingredient.measure,
+          ingredient: ingredient.id,                     
         });
       }
 
@@ -259,8 +237,8 @@ const AddRecipe = () => {
                     id="ingredientAmount"
                     type="text"
                     placeholder="Cantidad"
-                    value={ingredientAmount}
-                    onChange={(e) => setIngredientAmount(e.target.value)}
+                    value={ingredientQuantity}
+                    onChange={(e) => setIngredientQuantity(e.target.value)}
                   />
                 </div>
                 <div className="control">
@@ -300,7 +278,7 @@ const AddRecipe = () => {
                     {ingredients.map((ingredient) => (
                       <tr key={ingredient.id}>
                         <td>{ingredient.name}</td>
-                        <td>{ingredient.amount}</td>
+                        <td>{ingredient.quantity}</td>
                         <td>{ingredient.measure}</td>
                         <td>
                           <button
