@@ -1,36 +1,44 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosConfig';
 import AddComment from './AddComment'; // Importa AddComment
+import Layout from '../Layout';
 
-const CommentsRecipeId = ({ recipeId }) => {
+const CommentsRecipeId = () => {
+  const { id } = useParams();  // Obtiene el `id` desde los parámetros de la URL
+  const recipeId = parseInt(id, 10); // Convierte `id` a un número entero
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Cargar comentarios para la receta específica
   useEffect(() => {
+    if (!recipeId || isNaN(recipeId)) {
+      setError("recipeId no es válido o no es un número.");
+      setLoading(false);
+      return;
+    }
+
     const fetchComments = async () => {
       try {
-        const response = await axiosInstance.get(`/reciperover/comments/?recipe=${recipeId}`);
-        setComments(response.data.results || []);
+        const url = `/reciperover/comments/?recipe=${recipeId}`;
+        console.log("Request URL:", url); // Verificar la URL completa que se está enviando
+        const response = await axiosInstance.get(url);
+        console.log("Response:", response); // Verificar la respuesta completa de la API
+        if (response.data && Array.isArray(response.data.results)) {
+          setComments(response.data.results);
+        } else {
+          setError('Formato de respuesta inesperado');
+        }
       } catch (error) {
-        console.error('Error al cargar los comentarios:', error);
-        setError(error.message);
+        console.error('Error al cargar los comentarios:', error.response?.data || error.message);
+        setError(error.response?.data?.detail || error.message);
       } finally {
         setLoading(false);
       }
     };
 
-    if (recipeId) {
-      fetchComments();
-    }
+    fetchComments();
   }, [recipeId]);
-
-  useEffect(() => {
-    if (comments.length > 0) {
-      console.log('Comentarios actualizados:', comments);
-    }
-  }, [comments]);
 
   const handleCommentAdded = (newComment) => {
     setComments(prevComments => [newComment, ...prevComments]);
@@ -40,11 +48,9 @@ const CommentsRecipeId = ({ recipeId }) => {
   if (error) return <div>Error al cargar comentarios: {error}</div>;
 
   return (
+    <Layout>
     <div className="section">
       <h2 className="title">Comentarios</h2>
-      
-      {/* Renderiza AddComment aquí */}
-
 
       <table className="table is-fullwidth is-striped">
         <thead>
@@ -54,17 +60,24 @@ const CommentsRecipeId = ({ recipeId }) => {
           </tr>
         </thead>
         <tbody>
-          {comments.map(comment => (
-            <tr key={comment.id}>
-              <td>{comment.content || comment.comment}</td>
-              <td>{new Date(comment.created_at).toLocaleDateString()}</td>
+          {comments.length === 0 ? (
+            <tr>
+              <td colSpan="2">No hay comentarios para esta receta.</td>
             </tr>
-          ))}
+          ) : (
+            comments.map(comment => (
+              <tr key={comment.id}>
+                <td>{comment.content || comment.comment}</td>
+                <td>{new Date(comment.created_at).toLocaleDateString()}</td>
+              </tr>
+            ))
+          )}
         </tbody>
-        
       </table>
+      
       <AddComment recipeId={recipeId} onCommentAdded={handleCommentAdded} />
     </div>
+    </Layout>
   );
 };
 
