@@ -135,9 +135,21 @@ const Home = () => {
 
         <footer className="footer">
           <div className="content has-text-centered">
-            <p>&copy; 2024 Si! chef. Todos los derechos reservados.</p>
+            <div className="columns is-mobile">
+              <div className="column is-half">
+                <p>&copy; 2024 Si! chef. Todos los derechos reservados.</p>
+              </div>
+              <div className="column is-half has-text-right">
+                <Link to="/" className="has-text-white">Inicio</Link>
+                <span> | </span>
+                <Link to="/contact" className="has-text-white">Contacto</Link>
+                <span> | </span>
+                <Link to="/privacy" className="has-text-white">Privacidad</Link>
+              </div>
+            </div>
           </div>
         </footer>
+
       </div>
     </Layout>
   );

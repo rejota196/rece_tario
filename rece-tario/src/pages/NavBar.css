@@ -2,12 +2,12 @@
 
 /* Modo Día (predeterminado) */
 body {
-  background-color: #ffffff;
+  background-color: #c8cdf7;
   color: #333333;
 }
 
 .navbar {
-  background-color: #add8e6 !important; /* Celeste suave, tono pastel */
+  background-color: #e0a4f8 !important; /* Celeste suave, tono pastel */
   color: #333333;
 }
 
