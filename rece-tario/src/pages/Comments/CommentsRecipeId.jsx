@@ -1,15 +1,18 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState, useContext } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosConfig';
-import AddComment from './AddComment'; // Importa AddComment
+import AddComment from './AddComment';
 import Layout from '../Layout';
+import { AuthContext } from '../../contexts/AuthContext'; // Asegúrate de importar AuthContext
 
 const CommentsRecipeId = () => {
-  const { id } = useParams();  // Obtiene el `id` desde los parámetros de la URL
-  const recipeId = parseInt(id, 10); // Convierte `id` a un número entero
+  const { id } = useParams();  
+  const recipeId = parseInt(id, 10); 
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { state: { user } } = useContext(AuthContext); // Accede al usuario autenticado
+  const [recipeOwner, setRecipeOwner] = useState(null);
 
   useEffect(() => {
     if (!recipeId || isNaN(recipeId)) {
@@ -21,9 +24,7 @@ const CommentsRecipeId = () => {
     const fetchComments = async () => {
       try {
         const url = `/reciperover/comments/?recipe=${recipeId}`;
-        console.log("Request URL:", url); // Verificar la URL completa que se está enviando
         const response = await axiosInstance.get(url);
-        console.log("Response:", response); // Verificar la respuesta completa de la API
         if (response.data && Array.isArray(response.data.results)) {
           setComments(response.data.results);
         } else {
@@ -37,7 +38,17 @@ const CommentsRecipeId = () => {
       }
     };
 
+    const fetchRecipeOwner = async () => {
+      try {
+        const response = await axiosInstance.get(`/reciperover/recipes/${recipeId}/`);
+        setRecipeOwner(response.data.owner); // Establece el propietario de la receta
+      } catch (error) {
+        console.error('Error al obtener el propietario de la receta:', error);
+      }
+    };
+
     fetchComments();
+    fetchRecipeOwner();
   }, [recipeId]);
 
   const handleCommentAdded = (newComment) => {
@@ -56,18 +67,25 @@ const CommentsRecipeId = () => {
           <tr>
             <th>Comentario</th>
             <th>Fecha</th>
+            {user?.id === recipeOwner && <th>Acciones</th>} {/* Muestra las acciones solo si el usuario es el propietario */}
           </tr>
         </thead>
         <tbody>
           {comments.length === 0 ? (
             <tr>
-              <td colSpan="2">No hay comentarios para esta receta.</td>
+              <td colSpan="3">No hay comentarios para esta receta.</td>
             </tr>
           ) : (
             comments.map(comment => (
               <tr key={comment.id}>
                 <td>{comment.content || comment.comment}</td>
                 <td>{new Date(comment.created_at).toLocaleDateString()}</td>
+                {user?.id === recipeOwner || user?.id === comment.user && (
+                  <td>
+                    <Link to={`/edit-comment/${comment.id}`} className="button is-small is-info">Editar</Link>
+                    <Link to={`/delete-comment/${comment.id}`} className="button is-small is-danger">Eliminar</Link>
+                  </td>
+                )}
               </tr>
             ))
           )}

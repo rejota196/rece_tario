@@ -15,6 +15,7 @@ import EditCategory from './pages/Categories/EditCategory';
 import CommentList from './pages/Comments/CommentList';
 import AddComment from './pages/Comments/AddComment';
 import EditComment from './pages/Comments/EditComment';
+import DeleteComment from './pages/Comments/DeleteComment'; // Importa DeleteComment
 import CommentsRecipeId from './pages/Comments/CommentsRecipeId'; 
 import IngredientList from './pages/Ingredients/IngredientList';
 import AddIngredients from './pages/Ingredients/AddIngredients';
@@ -51,19 +52,19 @@ const App = () => {
           <Route path="/recipe/:id/ingredients" element={<ProtectedRoute element={<RecipeIngredients />} />} />
           <Route path="/recipe/:id/add-rating" element={<ProtectedRoute element={<AddRecipeRating />} />} />
           <Route path="/recipes/for-rating" element={<ProtectedRoute element={<RecipeListForRating />} />} />
-          <Route path="/recipe/:id/comments" element={<ProtectedRoute element={<CommentsRecipeId recipeId={window.location.pathname.split('/').pop()} />} />} />
+          <Route path="/recipe/:id/comments" element={<ProtectedRoute element={<CommentsRecipeId />} />} />
           
           {/* Categorías */}
           <Route path="/categories" element={<ProtectedRoute element={<CategoryList />} />} />
           <Route path="/add-category" element={<ProtectedRoute element={<AddCategory />} />} />
           <Route path="/edit-category/:id" element={<ProtectedRoute element={<EditCategory />} />} />
-          <Route path="/category/:id/recipes" element={<ProtectedRoute element={<RecipeListByCategory />} />} /> {/* Ruta modificada */}
+          <Route path="/category/:id/recipes" element={<ProtectedRoute element={<RecipeListByCategory />} />} />
 
           {/* Comentarios */}
           <Route path="/comments" element={<ProtectedRoute element={<CommentList />} />} />
           <Route path="/add-comment" element={<ProtectedRoute element={<AddComment />} />} />
           <Route path="/edit-comment/:id" element={<ProtectedRoute element={<EditComment />} />} />
-          <Route path="/recipe/:id/comments" element={<ProtectedRoute element={<CommentsRecipeId />} />} /> 
+          <Route path="/delete-comment/:id" element={<ProtectedRoute element={<DeleteComment />} />} /> {/* Ruta para eliminar comentario */}
           
           {/* Ingredientes */}
           <Route path="/ingredients" element={<ProtectedRoute element={<IngredientList />} />} />
