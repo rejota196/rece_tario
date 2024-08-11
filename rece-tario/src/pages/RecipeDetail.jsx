@@ -42,19 +42,14 @@ const RecipeDetail = () => {
         const measuresResponse = await axiosInstance.get('/reciperover/measures/');
         setMeasures(measuresResponse.data);
 
-        // Obtener el token del localStorage
-        const token = localStorage.getItem('authToken');
-        if (token) {
-          // Obtener la valoración del usuario actual para esta receta
-          const ratingsResponse = await axiosInstance.get(`/reciperover/ratings/`, {
-            params: { recipe: id },
-            headers: { Authorization: `Bearer ${token}` }
-          });
+        // Obtener la valoración del usuario actual para esta receta
+        const ratingsResponse = await axiosInstance.get(`/reciperover/ratings/`, {
+          params: { recipe: id }
+        });
 
-          if (ratingsResponse.data.results.length > 0) {
-            setRating(ratingsResponse.data.results[0].rating);
-            setRatingId(ratingsResponse.data.results[0].id); // Guardar el ID de la valoración
-          }
+        if (ratingsResponse.data.results.length > 0) {
+          setRating(ratingsResponse.data.results[0].rating);
+          setRatingId(ratingsResponse.data.results[0].id); // Guardar el ID de la valoración
         }
 
         setLoading(false);
@@ -78,26 +73,17 @@ const RecipeDetail = () => {
     };
 
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('Token de autenticación no encontrado.');
-      }
-
       let response;
       if (ratingId) {
         // Actualizar la valoración existente
-        response = await axiosInstance.patch(`/reciperover/ratings/${ratingId}/`, ratingData, {
-          headers: { Authorization: `Bearer ${token}`}
-        });
+        response = await axiosInstance.patch(`/reciperover/ratings/${ratingId}/`, ratingData);
 
         if (response.status !== 200) {
           throw new Error(`Fallo al actualizar la valoración: ${response.statusText}`);
         }
       } else {
         // Crear una nueva valoración
-        response = await axiosInstance.post('/reciperover/ratings/', ratingData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        response = await axiosInstance.post('/reciperover/ratings/', ratingData);
 
         if (response.status !== 201) {
           throw new Error(`Fallo al agregar la valoración: ${response.statusText}`);
