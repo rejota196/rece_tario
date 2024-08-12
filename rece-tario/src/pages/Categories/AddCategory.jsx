@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosConfig';
-import Layout from '../Layout';  
+import Layout from '../Layout';
 
 const AddCategory = () => {
   const [name, setName] = useState('');
@@ -21,19 +21,43 @@ const AddCategory = () => {
   return (
     <Layout>
       <div className="container">
-        <h1 className="title">Add Category</h1>
-        {error && <div className="notification is-danger">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="field">
-            <label className="label" htmlFor="name">Name</label>
-            <div className="control">
-              <input className="input" id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+        <div className="columns is-centered">
+          <div className="column is-half">
+            <div className="card">
+              <div className="card-content">
+                <h1 className="title has-text-centered">Añadir Nueva Categoría</h1>
+                {error && <div className="notification is-danger">{error}</div>}
+                <form onSubmit={handleSubmit}>
+                  <div className="field">
+                    <label className="label" htmlFor="name">Nombre de la Categoría</label>
+                    <div className="control has-icons-left">
+                      <input 
+                        className="input" 
+                        id="name" 
+                        type="text" 
+                        placeholder="Ingrese el nombre de la categoría"
+                        value={name} 
+                        onChange={(e) => setName(e.target.value)} 
+                        required 
+                      />
+                      <span className="icon is-small is-left">
+                        <i className="fas fa-tag"></i>
+                      </span>
+                    </div>
+                  </div>
+                  <div className="field is-grouped is-grouped-right">
+                    <div className="control">
+                      <button className="button is-link" type="submit">Añadir Categoría</button>
+                    </div>
+                    <div className="control">
+                      <button className="button is-light" type="button" onClick={() => navigate('/categories')}>Cancelar</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-          <div className="control">
-            <button className="button is-primary" type="submit">Add Category</button>
-          </div>
-        </form>
+        </div>
       </div>
     </Layout>
   );

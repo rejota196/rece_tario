@@ -1,4 +1,4 @@
-import { createContext, useReducer, useContext, useMemo } from 'react';
+import { createContext, useReducer, useContext, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types'; 
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -35,35 +35,35 @@ function reducer(state, action) {
 
 function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, {
-    user: localStorage.getItem("user__id"),
-    token: localStorage.getItem("authToken"),
-    isAuthenticated: !!localStorage.getItem("authToken"),
+      user__id: localStorage.getItem("user__id"),
+      token: localStorage.getItem("authToken"),
+      isAuthenticated: localStorage.getItem("authToken") ? true : false,
   });
   const navigate = useNavigate();
   const location = useLocation();
 
-  const actions = useMemo(() => ({
-    login: (token, user) => {
-      dispatch({ type: ACTIONS.LOGIN, payload: { token, user } });
-      localStorage.setItem("authToken", token);
-      localStorage.setItem("user__id", user);
-      const origin = location.state?.from?.pathname || "/";
-      navigate(origin);
-    },
-    logout: () => {
-      dispatch({ type: ACTIONS.LOGOUT });
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("user__id");
-      navigate('/');
-    },
-  }), [navigate, location]);
-
-  const value = useMemo(() => ({ state, actions }), [state, actions]);
+  const actions = {
+      login: (token, user__id) => {
+          dispatch({
+              type: ACTIONS.LOGIN,
+              payload: { token, user__id },
+          });
+          localStorage.setItem("authToken", token);
+          localStorage.setItem("user__id", user__id);
+          const origin = location.state?.from?.pathname || "/";
+          navigate(origin);
+      },
+      logout: () => {
+          dispatch({ type: ACTIONS.LOGOUT });
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("user__id");
+      },
+  };
 
   return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+      <AuthContext.Provider value={{ state, actions }}>
+          {children}
+      </AuthContext.Provider>
   );
 }
 
@@ -74,7 +74,7 @@ AuthProvider.propTypes = {
 function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth debe usarse con AuthProvider alGueis beibi");
+    throw new Error("useAuth debe usarse dentro de AuthProvider");
   }
   return context;
 }

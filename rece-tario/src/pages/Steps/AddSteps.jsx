@@ -21,39 +21,60 @@ const AddStep = () => {
 
   return (
     <Layout>
-      <div className="section">
-        <h1 className="title">Agregar Paso</h1>
-        {error && <div className="notification is-danger">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="field">
-            <label className="label" htmlFor="title">Título</label>
-            <div className="control">
-              <input
-                className="input"
-                id="title"
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
+      <div className="container">
+        <div className="columns is-centered">
+          <div className="column is-half">
+            <div className="card">
+              <div className="card-content">
+                <h1 className="title has-text-centered">Agregar Nuevo Paso</h1>
+                {error && <div className="notification is-danger">{error}</div>}
+                <form onSubmit={handleSubmit}>
+                  <div className="field">
+                    <label className="label" htmlFor="title">Título del Paso</label>
+                    <div className="control has-icons-left">
+                      <input
+                        className="input"
+                        id="title"
+                        type="text"
+                        placeholder="Ingrese el título del paso"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        required
+                      />
+                      <span className="icon is-small is-left">
+                        <i className="fas fa-heading"></i>
+                      </span>
+                    </div>
+                  </div>
+                  <div className="field">
+                    <label className="label" htmlFor="description">Descripción del Paso</label>
+                    <div className="control has-icons-left">
+                      <textarea
+                        className="textarea"
+                        id="description"
+                        placeholder="Describa los detalles del paso"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        required
+                      ></textarea>
+                      <span className="icon is-small is-left">
+                        <i className="fas fa-align-left"></i>
+                      </span>
+                    </div>
+                  </div>
+                  <div className="field is-grouped is-grouped-right">
+                    <div className="control">
+                      <button className="button is-link" type="submit">Agregar</button>
+                    </div>
+                    <div className="control">
+                      <button className="button is-light" type="button" onClick={() => navigate('/steps')}>Cancelar</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-          <div className="field">
-            <label className="label" htmlFor="description">Descripción</label>
-            <div className="control">
-              <textarea
-                className="textarea"
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-              ></textarea>
-            </div>
-          </div>
-          <div className="control">
-            <button className="button is-primary" type="submit">Agregar</button>
-          </div>
-        </form>
+        </div>
       </div>
     </Layout>
   );
